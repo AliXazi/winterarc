@@ -445,14 +445,18 @@ function clone(o){ return JSON.parse(JSON.stringify(o));}
 function escapeHtml(s){ return s.replace(/[&<>"]/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));}
 function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toast._id); toast._id=setTimeout(()=>t.classList.remove('show'),1700); }
 async function doReload(){
+  console.log('doReload triggered', {auth:AUTH.authenticated, stats:STATS, dataLen:DATA.length});
+  toast('Saving — reloading...');
   try{
     if(AUTH.authenticated){
       clearTimeout(saveTimer);
       const payload={data:DATA,checks:CHECKS,stats:STATS,streak:STREAK,last_100_date:LAST_100};
       if(STATS) payload.stats={...STATS, _defs:STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]}))};
-      await fetch('/api/winterarc',{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      const ctrl=new AbortController();
+      const t=setTimeout(()=>ctrl.abort(),4000);
+      await fetch('/api/winterarc',{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload), signal:ctrl.signal});
+      clearTimeout(t);
     } else {
-      // local: flush everything synchronously before reload
       try{
         localStorage.setItem(LS_TASKS, JSON.stringify(DATA));
         localStorage.setItem(LS_CHECKS, JSON.stringify(CHECKS));
@@ -463,7 +467,10 @@ async function doReload(){
       }catch(e){ console.error('local save failed',e); }
     }
   }catch(e){ console.error('save before reload failed',e); }
-  location.reload();
+  // hard reload with cache bust — ensures new HTML despite Render CDN cache
+  const url=new URL(location.href);
+  url.searchParams.set('r', Date.now().toString());
+  location.href=url.toString();
 }
 function todayStr(){ return new Date().toISOString().slice(0,10); }
 function yesterdayStr(){ const d=new Date(); d.setDate(d.getDate()-1); return d.toISOString().slice(0,10); }
