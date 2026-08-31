@@ -353,7 +353,10 @@
     </section>
   </div>
   <div class="grid" id="grid"></div>
-  <div class="hint" id="hint">Tip: Sign in with Google to save to cloud. Click ✎ to edit, double-click title to rename, “+ Add task” for custom habits. Use Edit Stats to customize polygon.</div>
+  <div style="display:flex;justify-content:center;margin-top:24px">
+    <button class="btn small" id="addCardBtn">+ Add Card</button>
+  </div>
+  <div class="hint" id="hint">Tip: Sign in with Google to save to cloud. Click ✎ to edit, double-click card title or task title to rename, “+ Add task” for habits, “+ Add Card” for new categories. Use Edit Stats to customize polygon.</div>
 </main>
 <footer class="wrap">
   <div class="footer-row">
@@ -384,6 +387,18 @@
     <div class="modal-actions">
       <button class="btn" id="closeStatsBtn">Close</button>
       <button class="btn" id="saveStatsBtn">Save</button>
+    </div>
+  </div>
+</div>
+<div class="modal" id="cardModal">
+  <div class="modal-card">
+    <h3>Add New Card</h3>
+    <p>Create a custom category like Health Infrastructure. Pick a name; tasks added inside will link to any stat.</p>
+    <div class="field"><label>Card Name *</label><input id="cardName" placeholder="e.g., Creative Work"/></div>
+    <div class="field"><label>Dot Color (optional)</label><input id="cardColor" placeholder="#ffffff or #00D4FF" value="#ffffff"/></div>
+    <div class="modal-actions">
+      <button class="btn" id="cancelCard">Cancel</button>
+      <button class="btn" id="confirmCard">Create Card</button>
     </div>
   </div>
 </div>
@@ -546,9 +561,9 @@ function loadLocal(){
 function initChart(){
   const canvas=document.getElementById('radar');
   if(!canvas) return;
-  const ctx=canvas.getContext('2d');
   const vals=STAT_KEYS.map(k=>STATS && STATS[k]!=null ? STATS[k] : 5);
-  if(chart){ chart.destroy(); chart=null; }
+  if(chart){ try{ chart.destroy(); }catch{} chart=null; }
+  const ctx=canvas.getContext('2d');
   chart=new Chart(ctx,{
     type:'radar',
     data:{
@@ -567,7 +582,7 @@ function initChart(){
     },
     options:{
       responsive:true, maintainAspectRatio:false,
-      animation:{duration:200, easing:'easeOutQuart'},
+      animation:false,
       transitions:{active:{animation:{duration:0}}},
       scales:{
         r:{
@@ -582,17 +597,23 @@ function initChart(){
       elements:{line:{tension:0.12}}
     }
   });
-  // immediate mini update
   updateChartImmediate();
 }
 function updateChartImmediate(){
-  if(!chart) return;
-  chart.data.labels=STAT_LABELS;
+  if(!chart){
+    // chart not ready (modal hidden) — retry next frame
+    requestAnimationFrame(updateChartImmediate);
+    return;
+  }
+  chart.data.labels=[...STAT_LABELS];
   chart.data.datasets[0].data=STAT_KEYS.map(k=>STATS && STATS[k]!=null ? STATS[k] : 5);
-  chart.update();
-  document.getElementById('levelBadge').textContent='LVL '+Math.floor(avgLevel())+' • '+avgLevel()+' avg';
+  chart.update('none');
+  const badge=document.getElementById('levelBadge');
+  if(badge) badge.textContent='LVL '+Math.floor(avgLevel())+' • '+avgLevel()+' avg';
   const mini=document.getElementById('statsMini');
-  mini.innerHTML=STAT_KEYS.map(k=>`<div class="mini"><b>${(STATS[k]!=null?STATS[k]:5).toFixed(1)}</b><span>${escapeHtml(k)}</span></div>`).join('');
+  if(mini) mini.innerHTML=STAT_KEYS.map(k=>`<div class="mini"><b>${(STATS[k]!=null?STATS[k]:5).toFixed(1)}</b><span>${escapeHtml(k)}</span></div>`).join('');
+  // force resize in case canvas was hidden during modal
+  try{ chart.resize(); }catch{}
 }
 function updateChart(){ updateChartImmediate(); }
 
@@ -657,7 +678,7 @@ function render(){
   DATA.forEach(cat=>{
     const doneInCat=cat.tasks.filter(t=>CHECKS[t.id]).length;
     const card=document.createElement('section'); card.className='card';
-    card.innerHTML=`<div class="card-head"><div class="card-title"><span class="dot" style="background:${cat.color};color:${cat.color}"></span> ${escapeHtml(cat.cat)}</div><span class="count">${doneInCat}/${cat.tasks.length}</span></div><div class="tasks"></div><div class="card-foot"><button class="add-btn" data-cat="${cat.id}">+ Add task</button></div>`;
+    card.innerHTML=`<div class="card-head"><div class="card-title" data-cat-id="${cat.id}" title="Double-click to rename card"><span class="dot" style="background:${cat.color};color:${cat.color}"></span> <span class="cat-label">${escapeHtml(cat.cat)}</span></div><div style="display:flex;gap:6px;align-items:center"><span class="count">${doneInCat}/${cat.tasks.length}</span><button class="icon-btn" data-card-del="${cat.id}" title="Delete card">✕</button></div></div><div class="tasks"></div><div class="card-foot"><button class="add-btn" data-cat="${cat.id}">+ Add task</button></div>`;
     const tasksEl=card.querySelector('.tasks');
     cat.tasks.forEach(t=>{
       if(t.stat==='activeRecall') t.stat='socialLife';
@@ -719,6 +740,22 @@ function render(){
       tasksEl.appendChild(row);
     });
     tasksEl.parentElement.querySelector('.add-btn').addEventListener('click',()=>openAdd(cat.id));
+    // card rename (double-click label) and delete
+    const catLabel=card.querySelector('.cat-label');
+    catLabel.addEventListener('dblclick',()=>{
+      const input=document.createElement('input'); input.value=cat.cat;
+      input.style.cssText='font:400 16px Saira Condensed,sans-serif;background:transparent;border:none;border-bottom:1px solid #fff;color:white;padding:2px 0;letter-spacing:1.5px;text-transform:uppercase;width:180px';
+      catLabel.replaceWith(input); input.focus(); input.select();
+      const save=()=>{ const v=input.value.trim()||cat.cat; cat.cat=v; saveAll(); render(); toast('Card renamed'); };
+      input.addEventListener('blur',save); input.addEventListener('keydown',e=>{ if(e.key==='Enter') save(); if(e.key==='Escape') render(); });
+    });
+    card.querySelector('[data-card-del]').addEventListener('click',()=>{
+      if(DATA.length<=1){ toast('Keep at least 1 card'); return; }
+      if(!confirm(`Delete card "${cat.cat}" and its ${cat.tasks.length} tasks?`)) return;
+      DATA=DATA.filter(c=>c.id!==cat.id);
+      cat.tasks.forEach(t=>delete CHECKS[t.id]);
+      saveAll(); render(); updateChartImmediate(); toast('Card removed');
+    });
     grid.appendChild(card);
   });
 }
@@ -751,16 +788,18 @@ function showOnboarding(){
 document.getElementById('onboardSave').addEventListener('click',()=>{
   const vals=STATS ? {...STATS} : {};
   document.querySelectorAll('#onboardGrid input').forEach(inp=>{ vals[inp.dataset.key]=parseInt(inp.value,10); });
-  // ensure all current keys present
   STAT_KEYS.forEach(k=>{ if(!(k in vals)) vals[k]=5; });
-  // keep _defs
-  if(STATS && STATS._defs) vals._defs=STATS._defs;
-  else vals._defs=STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]}));
+  vals._defs=STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]}));
   STATS=vals;
   document.getElementById('onboardModal').classList.remove('open');
   saveAll();
-  initChart();
-  render(); toast('Level 1 initialized');
+  // immediate visual update — init after modal hidden, no reload needed
+  requestAnimationFrame(()=>{
+    initChart();
+    render();
+    updateChartImmediate();
+    toast('Level 1 initialized');
+  });
 });
 // Stats manager
 const statsModal=document.getElementById('statsModal');
@@ -822,21 +861,19 @@ document.getElementById('addStatBtn').addEventListener('click',()=>{
   toast('Stat added');
 });
 document.getElementById('saveStatsBtn').addEventListener('click',()=>{
-  // validate labels not empty
   for(let i=0;i<STAT_LABELS.length;i++){ if(!STAT_LABELS[i].trim()){ toast('Label empty'); return; } STAT_LABELS[i]=STAT_LABELS[i].trim(); }
-  // normalize keys
   for(let i=0;i<STAT_KEYS.length;i++){ STAT_KEYS[i]=slugKey(STAT_KEYS[i]); }
-  // ensure STATS has all keys
   if(!STATS) STATS={};
   STAT_KEYS.forEach(k=>{ if(!(k in STATS)) STATS[k]=5; });
-  // remove orphan stats
   Object.keys(STATS).forEach(k=>{ if(k==='_defs') return; if(!STAT_KEYS.includes(k)) delete STATS[k]; });
   saveStatDefs();
   statsModal.classList.remove('open');
-  // rebuild chart and onboarding grid
-  initChart();
-  render();
-  toast('Stats updated');
+  requestAnimationFrame(()=>{
+    initChart();
+    render();
+    updateChartImmediate();
+    toast('Stats updated — chart refreshed');
+  });
 });
 
 const addModal=document.getElementById('addModal');
@@ -861,6 +898,25 @@ document.getElementById('confirmAdd').addEventListener('click',()=>{
   const newTask={id:'c'+Date.now(), title, desc: desc||'Custom habit', stat};
   cat.tasks.push(newTask);
   saveAll(); addModal.classList.remove('open'); render(); toast(AUTH.authenticated?'Task added — cloud':'Task added');
+});
+// Add Card modal
+const cardModal=document.getElementById('cardModal');
+document.getElementById('addCardBtn').addEventListener('click',()=>{
+  document.getElementById('cardName').value='';
+  document.getElementById('cardColor').value='#ffffff';
+  cardModal.classList.add('open');
+  setTimeout(()=>document.getElementById('cardName').focus(),50);
+});
+document.getElementById('cancelCard').addEventListener('click',()=>cardModal.classList.remove('open'));
+cardModal.addEventListener('click',e=>{ if(e.target===cardModal) cardModal.classList.remove('open'); });
+document.getElementById('confirmCard').addEventListener('click',()=>{
+  const name=document.getElementById('cardName').value.trim();
+  const color=document.getElementById('cardColor').value.trim()||'#ffffff';
+  if(!name){ toast('Card name required'); return; }
+  if(DATA.some(c=>c.cat.toLowerCase()===name.toLowerCase())){ toast('Card exists'); return; }
+  const newCat={ id:'h'+Date.now(), cat:name, color:/^#([0-9a-fA-F]{3,8})$/.test(color)?color:'#ffffff', tasks:[] };
+  DATA.push(newCat);
+  saveAll(); cardModal.classList.remove('open'); render(); toast('Card added');
 });
 document.getElementById('resetBtn').addEventListener('click',async()=>{
   if(!confirm('Reset all checks, custom tasks, and Level 1 stats?')) return;
