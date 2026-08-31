@@ -1,0 +1,8 @@
+__pycache__
+*.pyc
+.venv
+.idea
+.vscode
+.git
+winterarc.db
+*.log
