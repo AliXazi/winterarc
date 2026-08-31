@@ -36,7 +36,6 @@
   a{color:var(--link)}
   .wrap{max-width:1280px;margin:0 auto;padding:0 40px}
   @media (max-width:768px){.wrap{padding:0 20px}}
-  /* top-nav 56px opaque - fixes scroll overlap */
   header{
     position:sticky;top:0;z-index:20;
     height:56px;
@@ -56,7 +55,6 @@
     text-transform:uppercase;
     line-height:1;
   }
-  .brand h1 span{font-weight:400}
   .brand p{
     margin:4px 0 0;
     font-family:"JetBrains Mono", monospace;
@@ -66,15 +64,13 @@
     color:var(--muted);
   }
   .header-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  /* pills as date pills / category tags */
   .pill{
     font-family:"JetBrains Mono", monospace;
     font-size:11px;letter-spacing:2px;text-transform:uppercase;
     padding:6px 10px;border:1px solid var(--hairline);background:transparent;color:var(--muted);
   }
   .pill strong{color:var(--text);font-weight:400}
-  .pill.cloud{border-color:var(--hairline);color:var(--muted)}
-  .pill.local{border-color:var(--hairline);color:var(--muted)}
+  .pill.cloud,.pill.local{border-color:var(--hairline);color:var(--muted)}
   .streak{
     font-family:"JetBrains Mono", monospace;
     font-size:11px;letter-spacing:2px;text-transform:uppercase;
@@ -84,7 +80,6 @@
   .streak.active{border-color:var(--text);color:var(--text)}
   .streak .flame{font-size:14px}
   .streak.bump .flame{transform:scale(1.2)}
-  /* buttons - pill transparent outline */
   .btn{
     appearance:none;cursor:pointer;
     font-family:"JetBrains Mono", monospace;
@@ -99,6 +94,7 @@
   .btn:hover{background:var(--text);color:#000}
   .btn.google{background:transparent;color:var(--text);border-color:var(--text)}
   .btn.google:hover{background:var(--text);color:#000}
+  .btn.small{padding:8px 16px;height:32px;font-size:11px;letter-spacing:2px}
   .user-pill{
     display:flex;align-items:center;gap:8px;
     padding:0 12px 0 0;
@@ -111,7 +107,6 @@
     font-size:11px;letter-spacing:2px;text-transform:uppercase;
     max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   }
-  /* progress */
   .progress-wrap{margin-top:18px}
   .progress-meta{
     display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;
@@ -120,7 +115,6 @@
   .progress-meta b{color:var(--text);font-weight:400}
   .bar{height:1px;background:var(--hairline);overflow:hidden;position:relative}
   .fill{height:100%;width:0%;background:var(--text);transition:width .32s ease-out;will-change:width}
-  /* hero photo band */
   .hero-band{
     background:var(--canvas);
     padding:96px 0 64px;
@@ -153,7 +147,13 @@
     font-size:16px;letter-spacing:1.5px;text-transform:uppercase;font-weight:400;
     display:flex;align-items:center;gap:8px;
   }
-  .stat-sub{margin:8px 0 0;color:var(--body);font-size:14px;line-height:1.5;font-family:"Cormorant Garamond", serif}
+  /* subtext now matches graph text: JetBrains Mono 11px muted uppercase */
+  .stat-sub{
+    margin:8px 0 0;
+    font-family:"JetBrains Mono", monospace;
+    font-size:11px;letter-spacing:2px;text-transform:uppercase;
+    color:var(--muted);line-height:1.5;
+  }
   .level-badge{
     display:inline-flex;align-items:center;
     font-family:"JetBrains Mono", monospace;
@@ -225,8 +225,7 @@
     border:1px solid var(--text);background:transparent;
     display:grid;place-items:center;cursor:pointer;color:var(--muted);font-size:11px;
   }
-  .icon-btn:hover{color:var(--text);background:var(--text);color:#000}
-  .icon-btn.del:hover{background:#000;color:var(--text);border-color:var(--text)}
+  .icon-btn:hover{background:var(--text);color:#000}
   .card-foot{padding:12px 16px;border-top:1px solid var(--hairline);display:flex;justify-content:center}
   .add-btn{
     width:100%;padding:14px;
@@ -258,7 +257,7 @@
   .modal.open{display:grid}
   .modal-card{
     width:min(640px,100%);background:var(--surface-card);
-    border:1px solid var(--hairline);border-radius:0;padding:24px;
+    border:1px solid var(--hairline);border-radius:0;padding:24px;max-height:90vh;overflow:auto;
   }
   .modal-card h3{
     margin:0 0 8px;
@@ -289,6 +288,12 @@
   .slider-row input[type="range"]{flex:1;accent-color:var(--text)}
   .slider-val{width:32px;text-align:center;font-family:"JetBrains Mono", monospace;font-size:11px;letter-spacing:1px}
   .modal-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:24px}
+  /* stats manager */
+  .stats-manager-list{margin:16px 0;display:flex;flex-direction:column;gap:8px}
+  .stats-row{display:flex;gap:8px;align-items:center;padding:8px;border:1px solid var(--hairline)}
+  .stats-row input{flex:1;background:transparent;border:none;border-bottom:1px solid var(--hairline-strong);color:var(--text);font-family:"JetBrains Mono", monospace;font-size:11px;letter-spacing:1px;padding:6px 0;outline:none}
+  .stats-row input:focus{border-color:var(--text)}
+  .stats-row .key{max-width:140px;text-transform:lowercase}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
 </head>
@@ -325,17 +330,20 @@
 <main class="wrap">
   <div class="top-grid">
     <section class="stat-card">
-      <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
         <h2>Stat Polygon</h2>
-        <span class="level-badge" id="levelBadge">LVL 1</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="level-badge" id="levelBadge">LVL 1</span>
+          <button class="btn small" id="manageStatsBtn">Edit Stats</button>
+        </div>
       </div>
-      <p class="stat-sub">Complete tasks to level up. Each check = +0.18 to its stat (max 10). Chart expands as you grow.</p>
+      <p class="stat-sub">Polygon reflects all tracked stats. Each check adds +0.18. Scale 0 — 10.</p>
       <div class="chart-wrap"><canvas id="radar"></canvas></div>
       <div class="stats-mini" id="statsMini"></div>
     </section>
     <section class="stat-card">
       <h2>Streak Protocol</h2>
-      <p class="stat-sub">Streak increments only on 100% days. Miss a day → resets to 0. Stay locked in.</p>
+      <p class="stat-sub">100% days increment streak. Miss one — reset to zero.</p>
       <div style="margin-top:16px;padding:24px;border:1px solid var(--hairline);text-align:center">
         <div style="font-family:'Saira Condensed',sans-serif;font-size:48px;font-weight:400;letter-spacing:2px;line-height:1" id="bigStreak">0</div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:8px">Consecutive 100% days</div>
@@ -345,7 +353,7 @@
     </section>
   </div>
   <div class="grid" id="grid"></div>
-  <div class="hint" id="hint">Tip: Sign in with Google to save to cloud. Click ✎ to edit, double-click title to rename, “+ Add task” for custom habits.</div>
+  <div class="hint" id="hint">Tip: Sign in with Google to save to cloud. Click ✎ to edit, double-click title to rename, “+ Add task” for custom habits. Use Edit Stats to customize polygon.</div>
 </main>
 <footer class="wrap">
   <div class="footer-row">
@@ -356,11 +364,26 @@
 <div class="modal" id="onboardModal">
   <div class="modal-card">
     <h3>Initialize Protocol — Level 1</h3>
-    <p>Self-assess your baseline 1–10 across the 8 core stats. This sets your starting polygon. Be honest — you’ll level up from here.</p>
+    <p>Self-assess your baseline 1–10 across current stats. This sets your starting polygon. Be honest — you’ll level up from here.</p>
     <div class="onboard-grid" id="onboardGrid"></div>
     <div class="modal-actions">
       <button class="btn" id="onboardCancel" style="display:none">Cancel</button>
       <button class="btn" id="onboardSave">Initialize →</button>
+    </div>
+  </div>
+</div>
+<div class="modal" id="statsModal">
+  <div class="modal-card" style="width:min(720px,100%)">
+    <h3>Manage Stats</h3>
+    <p>Rename, remove, or add stats. Chart, onboarding, and task stat dropdown update instantly. Deleting a stat removes it from polygon but keeps tasks (reassign). Add stat creates key from label.</p>
+    <div id="statsManagerList" class="stats-manager-list"></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <input id="newStatLabel" placeholder="New stat label e.g. Social Life" style="flex:1;padding:12px 0;background:transparent;border:none;border-bottom:1px solid var(--hairline-strong);color:var(--text);font-family:Cormorant Garamond, serif;outline:none">
+      <button class="btn small" id="addStatBtn">Add Stat</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="closeStatsBtn">Close</button>
+      <button class="btn" id="saveStatsBtn">Save</button>
     </div>
   </div>
 </div>
@@ -380,8 +403,9 @@
 </div>
 <div class="toast" id="toast">Saved</div>
 <script>
-const STAT_KEYS=["hydration","nutrition","training","recovery","deepWork","discipline","reading","activeRecall"];
-const STAT_LABELS=["Hydration","Nutrition","Training","Recovery","Deep Work","Discipline","Reading","Active Recall"];
+// Bugatti: Social Life replaces Active Recall
+let STAT_KEYS=["hydration","nutrition","training","recovery","deepWork","discipline","reading","socialLife"];
+let STAT_LABELS=["Hydration","Nutrition","Training","Recovery","Deep Work","Discipline","Reading","Social Life"];
 const DEFAULTS=[
   { id:'h1', cat:'Health Infrastructure', color:'#ffffff', tasks:[
     { id:'t1', title:'Hydration', desc:'Drink 3–4 liters of water.', stat:'hydration'},
@@ -395,18 +419,62 @@ const DEFAULTS=[
   ]},
   { id:'h3', cat:'Academic Prep', color:'#ffffff', tasks:[
     { id:'t7', title:'Core Reading', desc:'Read 10–15 pages of primary texts.', stat:'reading'},
-    { id:'t8', title:'Active Recall', desc:'20–30 minutes of spaced repetition / flashcards.', stat:'activeRecall'},
+    { id:'t8', title:'Social Life', desc:'Meaningful social interaction — call, meet, or connect.', stat:'socialLife'},
   ]},
 ];
-const LS_TASKS='winterarc-tasks-v2', LS_CHECKS='winterarc-checks-v2', LS_STATS='winterarc-stats-v2', LS_STREAK='winterarc-streak', LS_LAST='winterarc-last100';
+const LS_TASKS='winterarc-tasks-v2', LS_CHECKS='winterarc-checks-v2', LS_STATS='winterarc-stats-v2', LS_STREAK='winterarc-streak', LS_LAST='winterarc-last100', LS_STAT_DEFS='winterarc-stat-defs-v1';
 let DATA=[], CHECKS={}, STATS=null, STREAK=0, LAST_100=null, AUTH={authenticated:false};
 let chart=null, saveTimer=null;
+
 function clone(o){ return JSON.parse(JSON.stringify(o));}
 function escapeHtml(s){ return s.replace(/[&<>"]/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));}
 function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toast._id); toast._id=setTimeout(()=>t.classList.remove('show'),1700); }
 function todayStr(){ return new Date().toISOString().slice(0,10); }
 function yesterdayStr(){ const d=new Date(); d.setDate(d.getDate()-1); return d.toISOString().slice(0,10); }
 function avgLevel(){ const v=STAT_KEYS.map(k=>STATS[k]||5); return (v.reduce((a,b)=>a+b,0)/v.length).toFixed(1); }
+function slugKey(label){ return label.trim().toLowerCase().replace(/[^a-z0-9]+/g,'').replace(/^./,c=>c.toLowerCase()) || ('stat'+Date.now()); }
+
+function loadStatDefs(){
+  try{
+    // try cloud _defs first if STATS already has it
+    if(STATS && STATS._defs && Array.isArray(STATS._defs) && STATS._defs.length){
+      const defs=STATS._defs;
+      STAT_KEYS=defs.map(d=>d.key);
+      STAT_LABELS=defs.map(d=>d.label);
+      return;
+    }
+    const raw=localStorage.getItem(LS_STAT_DEFS);
+    if(raw){
+      const defs=JSON.parse(raw);
+      if(Array.isArray(defs) && defs.length){
+        // migrate activeRecall -> socialLife if present
+        const mapped=defs.map(d=>{
+          if(d.key==='activeRecall') return {key:'socialLife', label:'Social Life'};
+          if(d.label==='Active Recall') return {key:d.key, label:'Social Life'};
+          return d;
+        });
+        STAT_KEYS=mapped.map(d=>d.key);
+        STAT_LABELS=mapped.map(d=>d.label);
+      }
+    } else {
+      // auto-migrate old stored stats that have activeRecall
+      if(STATS && 'activeRecall' in STATS && !('socialLife' in STATS)){
+        STATS.socialLife=STATS.activeRecall;
+        delete STATS.activeRecall;
+      }
+    }
+  }catch{}
+}
+function saveStatDefs(){
+  const defs=STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]}));
+  try{ localStorage.setItem(LS_STAT_DEFS, JSON.stringify(defs)); }catch{}
+  // also persist in STATS._defs for cloud sync
+  if(STATS){
+    STATS._defs=defs;
+  }
+  saveAll();
+}
+
 async function fetchAuth(){ try{ const r=await fetch('/api/me',{credentials:'include'}); return await r.json(); }catch{ return {authenticated:false}; } }
 async function fetchCloud(){
   const r=await fetch('/api/winterarc',{credentials:'include'});
@@ -418,6 +486,10 @@ async function saveCloud(){
   clearTimeout(saveTimer);
   saveTimer=setTimeout(async()=>{
     try{
+      // ensure _defs is in stats
+      if(STATS){
+        STATS._defs=STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]}));
+      }
       const res=await fetch('/api/winterarc',{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:DATA,checks:CHECKS,stats:STATS,streak:STREAK,last_100_date:LAST_100})});
       if(res.ok){ document.getElementById('storagePill').textContent='Cloud synced'; }
     }catch{}
@@ -430,10 +502,11 @@ function saveLocal(){
   localStorage.setItem(LS_STATS, JSON.stringify(STATS));
   localStorage.setItem(LS_STREAK, String(STREAK));
   if(LAST_100) localStorage.setItem(LS_LAST, LAST_100); else localStorage.removeItem(LS_LAST);
+  saveStatDefs();
 }
 function saveAll(){
   if(AUTH.authenticated) saveCloud();
-  else { saveLocal(); }
+  else saveLocal();
 }
 function loadLocal(){
   try{
@@ -458,6 +531,8 @@ function loadLocal(){
           const s=map.get(t.id); if(s){ t.title=s.title; t.desc=s.desc; t.stat=s.stat||t.stat; }
         }));
       }
+      // migrate task stat activeRecall -> socialLife
+      data.forEach(cat=>cat.tasks.forEach(t=>{ if(t.stat==='activeRecall') t.stat='socialLife'; }));
     }
     const checks=JSON.parse(localStorage.getItem(LS_CHECKS)||'{}');
     let stats=null;
@@ -469,8 +544,11 @@ function loadLocal(){
   }catch{ return {data:clone(DEFAULTS),checks:{},stats:null,streak:0,last:null}; }
 }
 function initChart(){
-  const ctx=document.getElementById('radar').getContext('2d');
-  const vals=STAT_KEYS.map(k=>STATS?STATS[k]:5);
+  const canvas=document.getElementById('radar');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const vals=STAT_KEYS.map(k=>STATS && STATS[k]!=null ? STATS[k] : 5);
+  if(chart){ chart.destroy(); chart=null; }
   chart=new Chart(ctx,{
     type:'radar',
     data:{
@@ -489,7 +567,7 @@ function initChart(){
     },
     options:{
       responsive:true, maintainAspectRatio:false,
-      animation:{duration:260, easing:'easeOutQuart'},
+      animation:{duration:200, easing:'easeOutQuart'},
       transitions:{active:{animation:{duration:0}}},
       scales:{
         r:{
@@ -504,19 +582,20 @@ function initChart(){
       elements:{line:{tension:0.12}}
     }
   });
+  // immediate mini update
+  updateChartImmediate();
 }
-let chartDebounce=null;
-function updateChart(){
+function updateChartImmediate(){
   if(!chart) return;
-  clearTimeout(chartDebounce);
-  chartDebounce=setTimeout(()=>{
-    chart.data.datasets[0].data=STAT_KEYS.map(k=>STATS[k]);
-    chart.update('none');
-    document.getElementById('levelBadge').textContent='LVL '+Math.floor(avgLevel())+' • '+avgLevel()+' avg';
-    const mini=document.getElementById('statsMini');
-    mini.innerHTML=STAT_KEYS.map(k=>`<div class="mini"><b>${STATS[k].toFixed(1)}</b><span>${k}</span></div>`).join('');
-  }, 60);
+  chart.data.labels=STAT_LABELS;
+  chart.data.datasets[0].data=STAT_KEYS.map(k=>STATS && STATS[k]!=null ? STATS[k] : 5);
+  chart.update();
+  document.getElementById('levelBadge').textContent='LVL '+Math.floor(avgLevel())+' • '+avgLevel()+' avg';
+  const mini=document.getElementById('statsMini');
+  mini.innerHTML=STAT_KEYS.map(k=>`<div class="mini"><b>${(STATS[k]!=null?STATS[k]:5).toFixed(1)}</b><span>${escapeHtml(k)}</span></div>`).join('');
 }
+function updateChart(){ updateChartImmediate(); }
+
 function updateStreakUI(animate=false){
   document.getElementById('streakNum').textContent=STREAK;
   document.getElementById('bigStreak').textContent=STREAK;
@@ -581,12 +660,14 @@ function render(){
     card.innerHTML=`<div class="card-head"><div class="card-title"><span class="dot" style="background:${cat.color};color:${cat.color}"></span> ${escapeHtml(cat.cat)}</div><span class="count">${doneInCat}/${cat.tasks.length}</span></div><div class="tasks"></div><div class="card-foot"><button class="add-btn" data-cat="${cat.id}">+ Add task</button></div>`;
     const tasksEl=card.querySelector('.tasks');
     cat.tasks.forEach(t=>{
+      if(t.stat==='activeRecall') t.stat='socialLife';
       const isDone=!!CHECKS[t.id];
       const row=document.createElement('div'); row.className='task'+(isDone?' done':''); row.dataset.id=t.id;
+      const statLabel=STAT_LABELS[STAT_KEYS.indexOf(t.stat)] || t.stat;
       row.innerHTML=`
         <input type="checkbox" class="cb" ${isDone?'checked':''} aria-label="toggle">
         <div class="task-main">
-          <div class="task-title"><span class="label">${escapeHtml(t.title)}</span> <span>${escapeHtml(t.stat||'')}</span></div>
+          <div class="task-title"><span class="label">${escapeHtml(t.title)}</span> <span>${escapeHtml(statLabel)}</span></div>
           <div class="task-desc" data-field="desc" spellcheck="false">${escapeHtml(t.desc)}</div>
         </div>
         <div class="task-actions">
@@ -601,7 +682,7 @@ function render(){
       cb.addEventListener('change',()=>{
         const wasDone=!!CHECKS[t.id];
         CHECKS[t.id]=cb.checked;
-        const key=t.stat||'hydration';
+        const key=t.stat||STAT_KEYS[0];
         if(STATS && STAT_KEYS.includes(key)){
           if(cb.checked && !wasDone){
             STATS[key]=Math.min(10, +(STATS[key]+0.18).toFixed(2));
@@ -659,7 +740,8 @@ function showOnboarding(){
   grid.innerHTML='';
   STAT_KEYS.forEach((k,i)=>{
     const row=document.createElement('div'); row.className='slider-row';
-    row.innerHTML=`<label>${STAT_LABELS[i]}</label><input type="range" min="1" max="10" value="5" step="1" data-key="${k}"><span class="slider-val">5</span>`;
+    const valDisplay=(STATS && STATS[k]!=null)? STATS[k] : 5;
+    row.innerHTML=`<label>${escapeHtml(STAT_LABELS[i])}</label><input type="range" min="1" max="10" value="${valDisplay}" step="1" data-key="${k}"><span class="slider-val">${valDisplay}</span>`;
     const range=row.querySelector('input'); const val=row.querySelector('.slider-val');
     range.addEventListener('input',()=>{ val.textContent=range.value; });
     grid.appendChild(row);
@@ -667,18 +749,102 @@ function showOnboarding(){
   document.getElementById('onboardModal').classList.add('open');
 }
 document.getElementById('onboardSave').addEventListener('click',()=>{
-  const vals={};
+  const vals=STATS ? {...STATS} : {};
   document.querySelectorAll('#onboardGrid input').forEach(inp=>{ vals[inp.dataset.key]=parseInt(inp.value,10); });
+  // ensure all current keys present
+  STAT_KEYS.forEach(k=>{ if(!(k in vals)) vals[k]=5; });
+  // keep _defs
+  if(STATS && STATS._defs) vals._defs=STATS._defs;
+  else vals._defs=STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]}));
   STATS=vals;
   document.getElementById('onboardModal').classList.remove('open');
-  initChart(); updateChart(); saveAll(); render(); toast('Level 1 initialized');
+  saveAll();
+  initChart();
+  render(); toast('Level 1 initialized');
 });
+// Stats manager
+const statsModal=document.getElementById('statsModal');
+function renderStatsManager(){
+  const list=document.getElementById('statsManagerList');
+  list.innerHTML='';
+  STAT_KEYS.forEach((k,i)=>{
+    const row=document.createElement('div'); row.className='stats-row';
+    row.innerHTML=`
+      <input class="key" value="${escapeHtml(k)}" placeholder="key" title="key (lowercase)">
+      <input class="label" value="${escapeHtml(STAT_LABELS[i])}" placeholder="Label">
+      <button class="btn small" data-act="del">Remove</button>
+    `;
+    const keyIn=row.querySelector('.key');
+    const labelIn=row.querySelector('.label');
+    labelIn.addEventListener('input',()=>{
+      STAT_LABELS[i]=labelIn.value.trim()||STAT_LABELS[i];
+      const slug=slugKey(labelIn.value);
+      // don't auto-change key if user edited it manually
+    });
+    keyIn.addEventListener('change',()=>{
+      const newKey=slugKey(keyIn.value);
+      const oldKey=STAT_KEYS[i];
+      if(!newKey || newKey===oldKey) { keyIn.value=oldKey; return; }
+      if(STAT_KEYS.includes(newKey)){ toast('Key exists'); keyIn.value=oldKey; return; }
+      STAT_KEYS[i]=newKey;
+      if(STATS && oldKey in STATS){ STATS[newKey]=STATS[oldKey]; delete STATS[oldKey]; }
+      // reassign tasks
+      DATA.forEach(cat=>cat.tasks.forEach(t=>{ if(t.stat===oldKey) t.stat=newKey; }));
+      keyIn.value=newKey;
+    });
+    row.querySelector('[data-act="del"]').addEventListener('click',()=>{
+      if(STAT_KEYS.length<=3){ toast('Keep at least 3 stats'); return; }
+      if(!confirm(`Remove stat "${STAT_LABELS[i]}"? Tasks using it will reset to ${STAT_LABELS[0]}.`)) return;
+      const rmKey=STAT_KEYS[i];
+      STAT_KEYS.splice(i,1); STAT_LABELS.splice(i,1);
+      if(STATS) delete STATS[rmKey];
+      DATA.forEach(cat=>cat.tasks.forEach(t=>{ if(t.stat===rmKey) t.stat=STAT_KEYS[0]; }));
+      renderStatsManager();
+    });
+    list.appendChild(row);
+  });
+}
+document.getElementById('manageStatsBtn').addEventListener('click',()=>{ renderStatsManager(); statsModal.classList.add('open'); });
+document.getElementById('closeStatsBtn').addEventListener('click',()=> statsModal.classList.remove('open'));
+statsModal.addEventListener('click',e=>{ if(e.target===statsModal) statsModal.classList.remove('open'); });
+document.getElementById('addStatBtn').addEventListener('click',()=>{
+  const input=document.getElementById('newStatLabel');
+  const label=input.value.trim();
+  if(!label){ toast('Label required'); return; }
+  const key=slugKey(label);
+  if(STAT_KEYS.includes(key)){ toast('Stat exists'); return; }
+  if(STAT_KEYS.length>=12){ toast('Max 12 stats'); return; }
+  STAT_KEYS.push(key); STAT_LABELS.push(label);
+  if(!STATS) STATS={};
+  STATS[key]=5;
+  input.value='';
+  renderStatsManager();
+  toast('Stat added');
+});
+document.getElementById('saveStatsBtn').addEventListener('click',()=>{
+  // validate labels not empty
+  for(let i=0;i<STAT_LABELS.length;i++){ if(!STAT_LABELS[i].trim()){ toast('Label empty'); return; } STAT_LABELS[i]=STAT_LABELS[i].trim(); }
+  // normalize keys
+  for(let i=0;i<STAT_KEYS.length;i++){ STAT_KEYS[i]=slugKey(STAT_KEYS[i]); }
+  // ensure STATS has all keys
+  if(!STATS) STATS={};
+  STAT_KEYS.forEach(k=>{ if(!(k in STATS)) STATS[k]=5; });
+  // remove orphan stats
+  Object.keys(STATS).forEach(k=>{ if(k==='_defs') return; if(!STAT_KEYS.includes(k)) delete STATS[k]; });
+  saveStatDefs();
+  statsModal.classList.remove('open');
+  // rebuild chart and onboarding grid
+  initChart();
+  render();
+  toast('Stats updated');
+});
+
 const addModal=document.getElementById('addModal');
 function openAdd(catId){
   const sel=document.getElementById('addCat'); sel.innerHTML=''; DATA.forEach(c=>{ const o=document.createElement('option'); o.value=c.id; o.textContent=c.cat; sel.appendChild(o); }); sel.value=catId;
   const sSel=document.getElementById('addStat'); sSel.innerHTML=''; STAT_KEYS.forEach((k,i)=>{ const o=document.createElement('option'); o.value=k; o.textContent=STAT_LABELS[i]; sSel.appendChild(o); });
   const cat=DATA.find(c=>c.id===catId);
-  if(cat && cat.tasks[0]) sSel.value=cat.tasks[0].stat||STAT_KEYS[0];
+  if(cat && cat.tasks[0]) sSel.value=STAT_KEYS.includes(cat.tasks[0].stat)? cat.tasks[0].stat : STAT_KEYS[0];
   document.getElementById('addTitle').value=''; document.getElementById('addDesc').value='';
   addModal.classList.add('open'); setTimeout(()=>document.getElementById('addTitle').focus(),50);
 }
@@ -701,12 +867,17 @@ document.getElementById('resetBtn').addEventListener('click',async()=>{
   if(AUTH.authenticated){
     DATA=clone(DEFAULTS); CHECKS={}; STATS=null; STREAK=0; LAST_100=null;
     localStorage.clear();
+    // reset stat defs to default
+    STAT_KEYS=["hydration","nutrition","training","recovery","deepWork","discipline","reading","socialLife"];
+    STAT_LABELS=["Hydration","Nutrition","Training","Recovery","Deep Work","Discipline","Reading","Social Life"];
     showOnboarding();
     await saveCloud();
     render();
   } else {
     localStorage.clear();
     DATA=clone(DEFAULTS); CHECKS={}; STATS=null; STREAK=0; LAST_100=null;
+    STAT_KEYS=["hydration","nutrition","training","recovery","deepWork","discipline","reading","socialLife"];
+    STAT_LABELS=["Hydration","Nutrition","Training","Recovery","Deep Work","Discipline","Reading","Social Life"];
     showOnboarding();
     render();
   }
@@ -732,7 +903,12 @@ async function init(){
     const cloud=await fetchCloud();
     if(cloud){
       DATA=cloud.data||clone(DEFAULTS); CHECKS=cloud.checks||{}; STATS=cloud.stats||null; STREAK=cloud.streak||0; LAST_100=cloud.last_100_date||null;
-      DATA.forEach(cat=>cat.tasks.forEach(t=>{ if(!t.stat) t.stat=STAT_KEYS[0]; }));
+      DATA.forEach(cat=>cat.tasks.forEach(t=>{ if(t.stat==='activeRecall') t.stat='socialLife'; if(!t.stat) t.stat=STAT_KEYS[0]; }));
+      if(STATS && STATS._defs){ loadStatDefs(); }
+      else if(STATS){
+        // migrate old activeRecall
+        if('activeRecall' in STATS && !('socialLife' in STATS)){ STATS.socialLife=STATS.activeRecall; delete STATS.activeRecall; }
+      }
     } else {
       DATA=clone(DEFAULTS); CHECKS={}; STATS=null; STREAK=0; LAST_100=null;
     }
@@ -742,20 +918,30 @@ async function init(){
     document.getElementById('footerMode').textContent='Local — sign in for cloud';
     const local=loadLocal();
     DATA=local.data; CHECKS=local.checks; STATS=local.stats; STREAK=local.streak; LAST_100=local.last;
+    if(STATS && STATS._defs) loadStatDefs();
+    else loadStatDefs();
   }
+  // migrate any lingering activeRecall keys
+  if(STATS && 'activeRecall' in STATS){ STATS.socialLife=STATS.activeRecall; delete STATS.activeRecall; }
+  DATA.forEach(cat=>cat.tasks.forEach(t=>{ if(t.stat==='activeRecall') t.stat='socialLife'; }));
+
   if(!STATS){
     showOnboarding();
     STATS=Object.fromEntries(STAT_KEYS.map(k=>[k,5]));
+    STATS._defs=STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]}));
   }
+  // ensure STATS has all keys and defs synced
+  if(!STATS._defs) STATS._defs=STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]}));
+  else loadStatDefs();
   STAT_KEYS.forEach(k=>{ if(!(k in STATS)) STATS[k]=5; });
   handleMissedStreakOnLoad();
-  initChart(); updateChart(); updateStreakUI(false);
-  const sel=document.getElementById('addCat'); if(sel){ sel.innerHTML=''; DATA.forEach(c=>{ const o=document.createElement('option'); o.value=c.id; o.textContent=c.cat; sel.appendChild(o); }); }
+  initChart();
+  updateStreakUI(false);
   render();
   checkStreakOnProgress();
 }
 init();
-window.WINTERARC={get DATA(){return DATA}, get CHECKS(){return CHECKS}, get STATS(){return STATS}, get AUTH(){return AUTH}};
+window.WINTERARC={get DATA(){return DATA}, get CHECKS(){return CHECKS}, get STATS(){return STATS}, get AUTH(){return AUTH}, get STAT_KEYS(){return STAT_KEYS}, get STAT_LABELS(){return STAT_LABELS}};
 </script>
 </body>
 </html>
