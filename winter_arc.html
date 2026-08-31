@@ -36,11 +36,11 @@
   a{color:var(--link)}
   .wrap{max-width:1280px;margin:0 auto;padding:0 40px}
   @media (max-width:768px){.wrap{padding:0 20px}}
-  /* top-nav 56px transparent */
+  /* top-nav 56px opaque - fixes scroll overlap */
   header{
     position:sticky;top:0;z-index:20;
     height:56px;
-    background:transparent;
+    background:var(--canvas);
     border-bottom:1px solid var(--hairline);
     display:flex;align-items:center;
   }
