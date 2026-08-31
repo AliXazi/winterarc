@@ -444,7 +444,21 @@ let chart=null, saveTimer=null;
 function clone(o){ return JSON.parse(JSON.stringify(o));}
 function escapeHtml(s){ return s.replace(/[&<>"]/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));}
 function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toast._id); toast._id=setTimeout(()=>t.classList.remove('show'),1700); }
-function doReload(){ setTimeout(()=>location.reload(),700); } // reload after save (except checkbox tick)
+async function doReload(){
+  // ensure cloud save completes before reload — fixes quiz/save not persisting until manual refresh
+  try{
+    if(AUTH.authenticated){
+      clearTimeout(saveTimer);
+      const payload={data:DATA,checks:CHECKS,stats:STATS,streak:STREAK,last_100_date:LAST_100};
+      if(STATS) payload.stats={...STATS, _defs:STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]}))};
+      await fetch('/api/winterarc',{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    } else {
+      // local already saved via saveAll(), just ensure stat defs flushed
+      saveStatDefs();
+    }
+  }catch(e){ console.error('save before reload failed',e); }
+  location.reload();
+}
 function todayStr(){ return new Date().toISOString().slice(0,10); }
 function yesterdayStr(){ const d=new Date(); d.setDate(d.getDate()-1); return d.toISOString().slice(0,10); }
 function avgLevel(){ const v=STAT_KEYS.map(k=>STATS[k]||5); return (v.reduce((a,b)=>a+b,0)/v.length).toFixed(1); }
