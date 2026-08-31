@@ -445,7 +445,6 @@ function clone(o){ return JSON.parse(JSON.stringify(o));}
 function escapeHtml(s){ return s.replace(/[&<>"]/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));}
 function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toast._id); toast._id=setTimeout(()=>t.classList.remove('show'),1700); }
 async function doReload(){
-  // ensure cloud save completes before reload — fixes quiz/save not persisting until manual refresh
   try{
     if(AUTH.authenticated){
       clearTimeout(saveTimer);
@@ -453,8 +452,15 @@ async function doReload(){
       if(STATS) payload.stats={...STATS, _defs:STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]}))};
       await fetch('/api/winterarc',{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     } else {
-      // local already saved via saveAll(), just ensure stat defs flushed
-      saveStatDefs();
+      // local: flush everything synchronously before reload
+      try{
+        localStorage.setItem(LS_TASKS, JSON.stringify(DATA));
+        localStorage.setItem(LS_CHECKS, JSON.stringify(CHECKS));
+        localStorage.setItem(LS_STATS, JSON.stringify(STATS));
+        localStorage.setItem(LS_STREAK, String(STREAK));
+        if(LAST_100) localStorage.setItem(LS_LAST, LAST_100); else localStorage.removeItem(LS_LAST);
+        saveStatDefs();
+      }catch(e){ console.error('local save failed',e); }
     }
   }catch(e){ console.error('save before reload failed',e); }
   location.reload();
@@ -800,21 +806,15 @@ function showOnboarding(){
   });
   document.getElementById('onboardModal').classList.add('open');
 }
-document.getElementById('onboardSave').addEventListener('click',()=>{
+document.getElementById('onboardSave').addEventListener('click',async()=>{
   const vals=STATS ? {...STATS} : {};
   document.querySelectorAll('#onboardGrid input').forEach(inp=>{ vals[inp.dataset.key]=parseInt(inp.value,10); });
   STAT_KEYS.forEach(k=>{ if(!(k in vals)) vals[k]=5; });
   vals._defs=STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]}));
   STATS=vals;
   document.getElementById('onboardModal').classList.remove('open');
-  saveAll();
-  requestAnimationFrame(()=>{
-    initChart();
-    render();
-    updateChartImmediate();
-    toast('Level 1 initialized');
-    doReload();
-  });
+  toast('Level 1 initialized — reloading');
+  await doReload();
 });
 // Stats manager
 const statsModal=document.getElementById('statsModal');
@@ -875,21 +875,17 @@ document.getElementById('addStatBtn').addEventListener('click',()=>{
   renderStatsManager();
   toast('Stat added');
 });
-document.getElementById('saveStatsBtn').addEventListener('click',()=>{
+document.getElementById('saveStatsBtn').addEventListener('click',async()=>{
   for(let i=0;i<STAT_LABELS.length;i++){ if(!STAT_LABELS[i].trim()){ toast('Label empty'); return; } STAT_LABELS[i]=STAT_LABELS[i].trim(); }
   for(let i=0;i<STAT_KEYS.length;i++){ STAT_KEYS[i]=slugKey(STAT_KEYS[i]); }
   if(!STATS) STATS={};
   STAT_KEYS.forEach(k=>{ if(!(k in STATS)) STATS[k]=5; });
   Object.keys(STATS).forEach(k=>{ if(k==='_defs') return; if(!STAT_KEYS.includes(k)) delete STATS[k]; });
-  saveStatDefs();
   statsModal.classList.remove('open');
-  requestAnimationFrame(()=>{
-    initChart();
-    render();
-    updateChartImmediate();
-    toast('Stats updated — chart refreshed');
-    doReload();
-  });
+  toast('Stats updated — reloading');
+  // ensure defs persisted then reload
+  saveStatDefs();
+  await doReload();
 });
 
 const addModal=document.getElementById('addModal');
