@@ -3,130 +3,293 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Winter Arc Protocol — RPG</title>
+<title>WINTER ARC — PROTOCOL</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@400;500&family=Cormorant+Garamond:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   :root{
-    --bg:#070A0F; --bg2:#0B0E14;
-    --card:rgba(255,255,255,0.06); --card-b:rgba(255,255,255,0.09);
-    --text:#F8FAFC; --muted:#94A3B8; --neon1:#00D4FF; --neon2:#7C3AED; --neon3:#A855F7; --radius:18px;
+    --canvas:#000000;
+    --surface-soft:#0d0d0d;
+    --surface-card:#141414;
+    --surface-elevated:#1f1f1f;
+    --hairline:#262626;
+    --hairline-strong:#3a3a3a;
+    --text:#ffffff;
+    --body:#cccccc;
+    --body-strong:#e6e6e6;
+    --muted:#999999;
+    --muted-soft:#666666;
+    --link:#c3d9f3;
+    --on-dark:#ffffff;
   }
-  *{box-sizing:border-box} html,body{height:100%}
+  *{box-sizing:border-box}
+  html,body{height:100%}
   body{
-    margin:0;font-family:Inter,system-ui,sans-serif;color:var(--text);
-    background:
-      radial-gradient(900px 500px at 20% -10%, rgba(124,58,237,0.18), transparent 60%),
-      radial-gradient(800px 600px at 90% 0%, rgba(0,212,255,0.14), transparent 60%),
-      radial-gradient(600px 400px at 50% 120%, rgba(168,85,247,0.08), transparent 60%),
-      linear-gradient(180deg, var(--bg), var(--bg2));
-    min-height:100%;overflow-x:hidden;
+    margin:0;
+    background:var(--canvas);
+    color:var(--text);
+    font-family:"Cormorant Garamond", Garamond, serif;
+    -webkit-font-smoothing:antialiased;
   }
-  body::before{
-    content:"";position:fixed;inset:0;
-    background-image:radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
-    background-size:22px 22px;
-    pointer-events:none;opacity:0.35;
+  a{color:var(--link)}
+  .wrap{max-width:1280px;margin:0 auto;padding:0 40px}
+  @media (max-width:768px){.wrap{padding:0 20px}}
+  /* top-nav 56px transparent */
+  header{
+    position:sticky;top:0;z-index:20;
+    height:56px;
+    background:transparent;
+    border-bottom:1px solid var(--hairline);
+    display:flex;align-items:center;
   }
-  .wrap{max-width:1180px;margin:0 auto;padding:0 20px;position:relative}
-  header{position:sticky;top:0;z-index:20;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);background:rgba(7,10,15,0.82);border-bottom:1px solid rgba(255,255,255,0.06);transform:translateZ(0);will-change:transform}
-  .header-inner{padding:18px 0 14px}
-  .title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
-  .brand h1{margin:0;font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:clamp(26px,4vw,34px);letter-spacing:-0.04em;line-height:0.95;text-transform:uppercase}
-  .brand h1 span{background:linear-gradient(90deg,var(--neon1),var(--neon2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-  .brand p{margin:6px 0 0;color:var(--muted);font-size:12px;letter-spacing:0.08em;text-transform:uppercase;font-family:"JetBrains Mono",monospace}
+  header .wrap{width:100%}
+  .header-inner{padding:0}
+  .title-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand h1{
+    margin:0;
+    font-family:"Saira Condensed", sans-serif;
+    font-weight:400;
+    font-size:14px;
+    letter-spacing:6px;
+    text-transform:uppercase;
+    line-height:1;
+  }
+  .brand h1 span{font-weight:400}
+  .brand p{
+    margin:4px 0 0;
+    font-family:"JetBrains Mono", monospace;
+    font-size:11px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
   .header-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .pill{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.06);color:var(--muted);display:flex;align-items:center;gap:6px}
-  .pill strong{color:var(--text);font-weight:700}
-  .pill.cloud{border-color:rgba(34,197,94,0.35);background:rgba(34,197,94,0.12);color:#86EFAC}
-  .pill.local{border-color:rgba(251,146,60,0.35);background:rgba(251,146,60,0.12);color:#FDBA74}
-  .streak{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:14px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);display:flex;align-items:center;gap:6px;transition:.3s}
-  .streak.active{border-color:rgba(251,146,60,0.45);background:rgba(251,146,60,0.14);box-shadow:0 0 18px rgba(251,146,60,0.35);color:#FFD6A8}
-  .streak .flame{font-size:16px;filter:drop-shadow(0 0 6px rgba(255,120,0,0.8));transition:transform .3s}
-  .streak.bump .flame{transform:scale(1.4) rotate(-6deg)}
-  .btn{appearance:none;border:0;cursor:pointer;padding:9px 14px;border-radius:999px;font-size:13px;font-weight:600;background:rgba(255,255,255,0.08);color:var(--text);border:1px solid rgba(255,255,255,0.12);transition:.15s}
-  .btn:hover{background:rgba(255,255,255,0.12);transform:translateY(-1px)}
-  .btn.google{background:white;color:#111;border-color:white;display:flex;align-items:center;gap:8px;font-weight:700}
-  .btn.google:hover{background:#F1F5F9}
-  .user-pill{display:flex;align-items:center;gap:8px;padding:6px 10px 6px 6px;border-radius:999px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12)}
-  .user-pill img{width:26px;height:26px;border-radius:999px;object-fit:cover;background:#222}
-  .user-pill span{font-size:13px;font-weight:600;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .progress-wrap{margin-top:14px}
-  .progress-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)}
-  .progress-meta b{color:var(--text);font-size:13px}
-  .bar{height:10px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;border:1px solid rgba(255,255,255,0.06);position:relative}
-  .fill{height:100%;width:0%;background:linear-gradient(90deg,var(--neon1),var(--neon2) 60%,var(--neon3));border-radius:999px;transition:width .32s ease-out;box-shadow:0 0 12px rgba(0,212,255,0.35);position:relative;will-change:width}
-  .fill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent);animation:shimmer 2.2s infinite;opacity:0}
-  .fill.anim::after{opacity:1}
-  @keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
-  main{padding:22px 0 40px}
-  .top-grid{display:grid;grid-template-columns:1.1fr 1.1fr;gap:18px;margin-bottom:18px}
-  @media (max-width:980px){.top-grid{grid-template-columns:1fr}}
-  .stat-card{border-radius:var(--radius);background:var(--card);border:1px solid var(--card-b);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:16px;box-shadow:0 8px 24px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.06);position:relative;overflow:hidden;contain:layout paint;transform:translateZ(0)}
-  .stat-card h2{margin:0;font-family:"Space Grotesk",sans-serif;font-size:12px;letter-spacing:0.10em;text-transform:uppercase;display:flex;align-items:center;gap:8px}
-  .stat-sub{margin:6px 0 0;color:var(--muted);font-size:12.5px;line-height:1.5}
-  .level-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,var(--neon1),var(--neon2));color:white;font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase}
-  .chart-wrap{position:relative;height:280px;margin-top:12px;transform:translateZ(0);contain:layout paint}
+  /* pills as date pills / category tags */
+  .pill{
+    font-family:"JetBrains Mono", monospace;
+    font-size:11px;letter-spacing:2px;text-transform:uppercase;
+    padding:6px 10px;border:1px solid var(--hairline);background:transparent;color:var(--muted);
+  }
+  .pill strong{color:var(--text);font-weight:400}
+  .pill.cloud{border-color:var(--hairline);color:var(--muted)}
+  .pill.local{border-color:var(--hairline);color:var(--muted)}
+  .streak{
+    font-family:"JetBrains Mono", monospace;
+    font-size:11px;letter-spacing:2px;text-transform:uppercase;
+    padding:6px 10px;border:1px solid var(--hairline);background:transparent;color:var(--muted);
+    display:flex;align-items:center;gap:8px;
+  }
+  .streak.active{border-color:var(--text);color:var(--text)}
+  .streak .flame{font-size:14px}
+  .streak.bump .flame{transform:scale(1.2)}
+  /* buttons - pill transparent outline */
+  .btn{
+    appearance:none;cursor:pointer;
+    font-family:"JetBrains Mono", monospace;
+    font-size:14px;letter-spacing:2.5px;text-transform:uppercase;
+    padding:14px 32px;height:44px;
+    border-radius:9999px;
+    background:transparent;color:var(--on-dark);
+    border:1px solid var(--text);
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    transition:background .15s,color .15s;
+  }
+  .btn:hover{background:var(--text);color:#000}
+  .btn.google{background:transparent;color:var(--text);border-color:var(--text)}
+  .btn.google:hover{background:var(--text);color:#000}
+  .user-pill{
+    display:flex;align-items:center;gap:8px;
+    padding:0 12px 0 0;
+    border:1px solid var(--hairline);background:transparent;
+    height:40px;
+  }
+  .user-pill img{width:40px;height:40px;object-fit:cover;background:var(--surface-card);border-right:1px solid var(--hairline)}
+  .user-pill span{
+    font-family:"JetBrains Mono", monospace;
+    font-size:11px;letter-spacing:2px;text-transform:uppercase;
+    max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  /* progress */
+  .progress-wrap{margin-top:18px}
+  .progress-meta{
+    display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;
+    font-family:"JetBrains Mono", monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)
+  }
+  .progress-meta b{color:var(--text);font-weight:400}
+  .bar{height:1px;background:var(--hairline);overflow:hidden;position:relative}
+  .fill{height:100%;width:0%;background:var(--text);transition:width .32s ease-out;will-change:width}
+  /* hero photo band */
+  .hero-band{
+    background:var(--canvas);
+    padding:96px 0 64px;
+    border-bottom:1px solid var(--hairline);
+    text-align:center;
+  }
+  .hero-band h2{
+    margin:0;
+    font-family:"Saira Condensed", sans-serif;
+    font-size:64px;font-weight:400;letter-spacing:4px;text-transform:uppercase;line-height:1.1;
+  }
+  @media (max-width:768px){.hero-band h2{font-size:32px;letter-spacing:2px}.hero-band{padding:64px 0 40px}}
+  .hero-band p{
+    margin:16px auto 0;max-width:560px;
+    font-family:"Cormorant Garamond", serif;
+    font-size:16px;line-height:1.5;color:var(--body);
+  }
+  main{padding:0 0 80px}
+  .top-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin:64px 0}
+  @media (max-width:980px){.top-grid{grid-template-columns:1fr;gap:24px}}
+  .stat-card{
+    background:var(--surface-card);
+    border:1px solid var(--hairline);
+    border-radius:0;
+    padding:24px;
+  }
+  .stat-card h2{
+    margin:0;
+    font-family:"Saira Condensed", sans-serif;
+    font-size:16px;letter-spacing:1.5px;text-transform:uppercase;font-weight:400;
+    display:flex;align-items:center;gap:8px;
+  }
+  .stat-sub{margin:8px 0 0;color:var(--body);font-size:14px;line-height:1.5;font-family:"Cormorant Garamond", serif}
+  .level-badge{
+    display:inline-flex;align-items:center;
+    font-family:"JetBrains Mono", monospace;
+    font-size:11px;letter-spacing:2px;text-transform:uppercase;
+    padding:6px 10px;border:1px solid var(--hairline);color:var(--muted);background:transparent;
+  }
+  .chart-wrap{position:relative;height:280px;margin-top:24px}
   .chart-wrap canvas{width:100%!important;height:100%!important}
-  .stats-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+  .stats-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:24px}
   @media (max-width:600px){.stats-mini{grid-template-columns:repeat(2,1fr)}}
-  .mini{padding:8px 10px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);text-align:center}
-  .mini b{display:block;font-family:"Space Grotesk",sans-serif;font-size:14px}
-  .mini span{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase}
-  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-  @media (max-width:980px){.grid{grid-template-columns:1fr}}
-  .card{border-radius:var(--radius);background:var(--card);border:1px solid var(--card-b);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.06);transition:transform .15s, border-color .15s;contain:layout paint;transform:translateZ(0)}
-  .card:hover{transform:translateY(-2px);border-color:rgba(255,255,255,0.14)}
-  .card-head{padding:16px 18px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.06);background:linear-gradient(180deg, rgba(255,255,255,0.05), transparent)}
-  .card-title{display:flex;align-items:center;gap:10px;font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:12px;letter-spacing:0.10em;text-transform:uppercase}
-  .dot{width:9px;height:9px;border-radius:999px;box-shadow:0 0 12px currentColor}
-  .count{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--muted);padding:5px 8px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08)}
-  .tasks{padding:10px 10px 12px}
-  .task{display:flex;align-items:flex-start;gap:12px;padding:12px 12px;border-radius:12px;transition:background .12s;contain:layout}
-  .task:hover{background:rgba(255,255,255,0.05)}
+  .mini{padding:12px;text-align:center;border:1px solid var(--hairline);background:transparent}
+  .mini b{display:block;font-family:"Saira Condensed", sans-serif;font-size:16px;letter-spacing:1px;font-weight:400}
+  .mini span{font-family:"JetBrains Mono", monospace;font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px}
+  @media (max-width:980px){.grid{grid-template-columns:1fr;gap:24px}}
+  .card{
+    background:var(--surface-card);
+    border:1px solid var(--hairline);
+    border-radius:0;
+    overflow:hidden;
+  }
+  .card-head{
+    padding:16px 24px;
+    display:flex;align-items:center;justify-content:space-between;
+    border-bottom:1px solid var(--hairline);
+  }
+  .card-title{
+    display:flex;align-items:center;gap:10px;
+    font-family:"Saira Condensed", sans-serif;
+    font-weight:400;font-size:16px;letter-spacing:1.5px;text-transform:uppercase;
+  }
+  .dot{width:7px;height:7px;border-radius:999px}
+  .count{
+    font-family:"JetBrains Mono", monospace;
+    font-size:11px;letter-spacing:2px;text-transform:uppercase;
+    color:var(--muted);padding:4px 8px;border:1px solid var(--hairline);
+  }
+  .tasks{padding:12px 16px}
+  .task{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--hairline)}
+  .task:last-child{border-bottom:0}
   .task.done .task-title{opacity:0.55}
-  .cb{appearance:none;-webkit-appearance:none;width:22px;height:22px;min-width:22px;border-radius:7px;border:1.5px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.04);display:grid;place-items:center;cursor:pointer;transition:.16s;margin-top:1px}
-  .cb:hover{border-color:rgba(255,255,255,0.32);transform:scale(1.04)}
-  .cb:checked{background:linear-gradient(135deg,var(--neon1),var(--neon2));border-color:transparent;box-shadow:0 0 14px rgba(0,212,255,0.55)}
-  .cb:checked::after{content:"";width:5px;height:9px;border:solid white;border-width:0 2px 2px 0;transform:rotate(45deg) translateY(-0.5px)}
+  .cb{
+    appearance:none;-webkit-appearance:none;
+    width:20px;height:20px;min-width:20px;
+    border:1px solid var(--hairline-strong);background:transparent;
+    display:grid;place-items:center;cursor:pointer;margin-top:2px;border-radius:0;
+  }
+  .cb:checked{background:var(--text);border-color:var(--text)}
+  .cb:checked::after{content:"";width:5px;height:9px;border:solid #000;border-width:0 1.5px 1.5px 0;transform:rotate(45deg) translateY(-1px)}
   .task-main{flex:1;min-width:0}
-  .task-title{font-size:13.5px;font-weight:600;letter-spacing:-0.01em;line-height:1.3}
-  .task-desc{margin-top:4px;font-size:12.8px;line-height:1.45;color:var(--muted);outline:none;border-radius:8px;padding:4px 6px;margin-left:-6px;word-break:break-word}
-  .task-desc[contenteditable="true"]{background:rgba(255,255,255,0.08);color:var(--text);box-shadow:inset 0 0 0 1px rgba(0,212,255,0.35)}
-  .task.done .task-desc{color:#6B7280;text-decoration:line-through;text-decoration-color:rgba(255,255,255,0.25)}
-  .task-actions{display:flex;gap:6px;align-items:center;opacity:0;transition:.15s}
-  .task:hover .task-actions{opacity:1} @media (hover:none){.task-actions{opacity:1}}
-  .icon-btn{width:28px;height:28px;border-radius:999px;border:1px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.06);display:grid;place-items:center;cursor:pointer;color:var(--muted);transition:.15s;font-size:12px}
-  .icon-btn:hover{color:var(--text);background:rgba(255,255,255,0.10)} .icon-btn.del:hover{background:rgba(239,68,68,0.18);border-color:rgba(239,68,68,0.35);color:#FCA5A5}
-  .card-foot{padding:10px;border-top:1px solid rgba(255,255,255,0.06);display:flex;justify-content:center}
-  .add-btn{width:100%;padding:10px;border-radius:10px;border:1px dashed rgba(255,255,255,0.14);background:rgba(255,255,255,0.04);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer}
-  .add-btn:hover{background:rgba(255,255,255,0.07);color:var(--text)}
-  .hint{margin-top:18px;padding:12px 14px;border-radius:12px;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.18);color:#BFEFFF;font-size:12.5px;line-height:1.5;font-family:"JetBrains Mono",monospace}
-  footer{padding:0 0 36px} .footer-row{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;color:var(--muted);font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:0.06em;text-transform:uppercase}
-  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(12px);background:rgba(15,18,26,0.92);border:1px solid rgba(255,255,255,0.12);color:var(--text);padding:10px 14px;border-radius:999px;font-size:13px;backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:.2s;box-shadow:0 10px 30px rgba(0,0,0,0.45)}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-  /* modal */
-  .modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,0.58);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:50;padding:20px}
+  .task-title{font-family:"Saira Condensed", sans-serif;font-size:15px;letter-spacing:1px;text-transform:uppercase;line-height:1.2}
+  .task-title span:last-child{
+    font-family:"JetBrains Mono", monospace!important;
+    font-size:10px!important;letter-spacing:2px!important;text-transform:uppercase!important;
+    border:1px solid var(--hairline)!important;background:transparent!important;color:var(--muted)!important;
+    padding:2px 6px!important;border-radius:0!important;
+  }
+  .task-desc{
+    margin-top:6px;
+    font-family:"Cormorant Garamond", serif;
+    font-size:14px;line-height:1.5;color:var(--body);
+    outline:none;padding:0;word-break:break-word;
+  }
+  .task-desc[contenteditable="true"]{color:var(--text);border-bottom:1px solid var(--text)}
+  .task.done .task-desc{color:var(--muted-soft);text-decoration:line-through}
+  .task-actions{display:flex;gap:6px;align-items:center}
+  .icon-btn{
+    width:32px;height:32px;border-radius:9999px;
+    border:1px solid var(--text);background:transparent;
+    display:grid;place-items:center;cursor:pointer;color:var(--muted);font-size:11px;
+  }
+  .icon-btn:hover{color:var(--text);background:var(--text);color:#000}
+  .icon-btn.del:hover{background:#000;color:var(--text);border-color:var(--text)}
+  .card-foot{padding:12px 16px;border-top:1px solid var(--hairline);display:flex;justify-content:center}
+  .add-btn{
+    width:100%;padding:14px;
+    border:1px solid var(--text);border-radius:9999px;
+    background:transparent;color:var(--text);
+    font-family:"JetBrains Mono", monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;
+    cursor:pointer;
+  }
+  .add-btn:hover{background:var(--text);color:#000}
+  .hint{
+    margin-top:32px;padding:16px;
+    border:1px solid var(--hairline);background:transparent;
+    color:var(--body);font-family:"Cormorant Garamond", serif;font-size:14px;line-height:1.5;
+  }
+  footer{padding:64px 0;border-top:1px solid var(--hairline);margin-top:40px}
+  .footer-row{
+    display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;
+    color:var(--muted);font-family:"JetBrains Mono", monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;
+  }
+  .toast{
+    position:fixed;left:50%;bottom:32px;transform:translateX(-50%);
+    background:var(--surface-elevated);border:1px solid var(--hairline-strong);
+    color:var(--text);padding:12px 20px;
+    font-family:"JetBrains Mono", monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;
+    opacity:0;pointer-events:none;transition:.2s;
+  }
+  .toast.show{opacity:1}
+  .modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,0.85);z-index:50;padding:20px}
   .modal.open{display:grid}
-  .modal-card{width:min(640px,100%);background:#0F1218;border:1px solid rgba(255,255,255,0.10);border-radius:16px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,0.6);max-height:90vh;overflow:auto}
-  .modal-card h3{margin:0 0 4px;font-family:"Space Grotesk",sans-serif;font-size:18px}
-  .modal-card p{margin:0 0 14px;color:var(--muted);font-size:13px;line-height:1.5}
-  .field{margin-bottom:12px} .field label{display:block;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-family:"JetBrains Mono",monospace}
-  .field input,.field select,.field textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:var(--text);font-size:14px;outline:none}
-  .field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(0,212,255,0.45);box-shadow:0 0 0 3px rgba(0,212,255,0.12)}
+  .modal-card{
+    width:min(640px,100%);background:var(--surface-card);
+    border:1px solid var(--hairline);border-radius:0;padding:24px;
+  }
+  .modal-card h3{
+    margin:0 0 8px;
+    font-family:"Saira Condensed", sans-serif;
+    font-size:24px;letter-spacing:1.5px;text-transform:uppercase;font-weight:400;
+  }
+  .modal-card p{margin:0 0 24px;color:var(--body);font-family:"Cormorant Garamond", serif;font-size:14px;line-height:1.5}
+  .field{margin-bottom:16px}
+  .field label{
+    display:block;
+    font-family:"JetBrains Mono", monospace;
+    font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;
+  }
+  .field input,.field select,.field textarea{
+    width:100%;padding:12px 0;
+    border:none;border-bottom:1px solid var(--hairline-strong);
+    background:transparent;color:var(--text);
+    font-family:"Cormorant Garamond", serif;font-size:16px;outline:none;border-radius:0;
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--text)}
   .onboard-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   @media (max-width:600px){.onboard-grid{grid-template-columns:1fr}}
-  .slider-row{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06)}
-  .slider-row label{flex:1;font-size:13px;font-weight:600}
-  .slider-row input[type="range"]{flex:1;accent-color:var(--neon1)}
-  .slider-val{width:32px;text-align:center;font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--neon1)}
-  .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
-  @media (prefers-reduced-motion: reduce){
-    .fill,.card,.task,.btn,.icon-btn{transition:none!important;animation:none!important}
-    .fill::after{display:none}
+  .slider-row{
+    display:flex;align-items:center;gap:10px;
+    padding:12px 0;border-bottom:1px solid var(--hairline);
   }
+  .slider-row label{flex:1;font-family:"Cormorant Garamond", serif;font-size:14px}
+  .slider-row input[type="range"]{flex:1;accent-color:var(--text)}
+  .slider-val{width:32px;text-align:center;font-family:"JetBrains Mono", monospace;font-size:11px;letter-spacing:1px}
+  .modal-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:24px}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
@@ -135,30 +298,35 @@
     <div class="header-inner">
       <div class="title-row">
         <div class="brand">
-          <h1>Winter Arc <span>Protocol</span></h1>
+          <h1>WINTER ARC</h1>
           <p>Focus • Discipline • Execution — <span id="dateStr"></span></p>
         </div>
         <div class="header-actions" id="authArea">
           <div class="pill" id="countPill"><span id="completedCount">0</span>/<span id="totalCount">0</span> • <strong id="pctLabel">0%</strong></div>
-          <div class="streak" id="streakPill" title="Consecutive 100% days"><span class="flame">🔥</span> <span id="streakNum">0</span></div>
-          <span class="pill local" id="storagePill">Local</span>
+          <div class="streak" id="streakPill" title="Consecutive 100% days"><span class="flame">—</span> <span id="streakNum">0</span></div>
+          <span class="pill" id="storagePill">Local</span>
           <button class="btn" id="resetBtn">Reset</button>
-          <a class="btn google" id="googleBtn" href="/auth/google"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09A6.98 6.98 0 0 1 5.22 12c0-.72.12-1.42.34-2.09V7.07H2.18A11 11 0 0 0 1 12c0 1.78.42 3.46 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Sign in</a>
+          <a class="btn google" id="googleBtn" href="/auth/google">Sign in</a>
         </div>
-      </div>
-      <div class="progress-wrap">
-        <div class="progress-meta"><span>Daily protocol</span><b id="progressText">0% complete</b></div>
-        <div class="bar"><div class="fill" id="fill"></div></div>
       </div>
     </div>
   </div>
 </header>
-
+<div class="hero-band">
+  <div class="wrap">
+    <h2>WINTER ARC PROTOCOL</h2>
+    <p>An austere system for discipline. No color, no chrome — only typography, structure, and execution.</p>
+    <div class="progress-wrap" style="max-width:640px;margin:32px auto 0">
+      <div class="progress-meta"><span>Daily protocol</span><b id="progressText">0% complete</b></div>
+      <div class="bar"><div class="fill" id="fill"></div></div>
+    </div>
+  </div>
+</div>
 <main class="wrap">
   <div class="top-grid">
     <section class="stat-card">
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <h2><span style="width:8px;height:8px;border-radius:999px;background:var(--neon1);box-shadow:0 0 10px var(--neon1)"></span> Stat Polygon</h2>
+        <h2>Stat Polygon</h2>
         <span class="level-badge" id="levelBadge">LVL 1</span>
       </div>
       <p class="stat-sub">Complete tasks to level up. Each check = +0.18 to its stat (max 10). Chart expands as you grow.</p>
@@ -166,29 +334,25 @@
       <div class="stats-mini" id="statsMini"></div>
     </section>
     <section class="stat-card">
-      <h2>🔥 Streak Protocol</h2>
+      <h2>Streak Protocol</h2>
       <p class="stat-sub">Streak increments only on 100% days. Miss a day → resets to 0. Stay locked in.</p>
-      <div style="margin-top:14px;padding:16px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);text-align:center">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:48px;font-weight:700;line-height:1" id="bigStreak">0</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-top:6px">Consecutive 100% days</div>
-        <div style="margin-top:12px;font-size:12px;color:var(--muted)" id="streakDetail">No streak yet — complete all 8 today to start.</div>
+      <div style="margin-top:16px;padding:24px;border:1px solid var(--hairline);text-align:center">
+        <div style="font-family:'Saira Condensed',sans-serif;font-size:48px;font-weight:400;letter-spacing:2px;line-height:1" id="bigStreak">0</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:8px">Consecutive 100% days</div>
+        <div style="margin-top:12px;font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--muted)" id="streakDetail">No streak yet — complete all 8 today to start.</div>
       </div>
-      <div class="hint" style="margin-top:14px">Onboarding saves your Level 1 baseline. Progress is cloud-synced when signed in — nothing stays on this device.</div>
+      <div class="hint" style="margin-top:24px">Onboarding saves your Level 1 baseline. Progress is cloud-synced when signed in — nothing stays on this device.</div>
     </section>
   </div>
-
   <div class="grid" id="grid"></div>
   <div class="hint" id="hint">Tip: Sign in with Google to save to cloud. Click ✎ to edit, double-click title to rename, “+ Add task” for custom habits.</div>
 </main>
-
 <footer class="wrap">
   <div class="footer-row">
     <span>© Winter Arc — Stay locked in.</span>
     <span id="footerMode">Cloud-synced when signed in</span>
   </div>
 </footer>
-
-<!-- Onboarding Modal -->
 <div class="modal" id="onboardModal">
   <div class="modal-card">
     <h3>Initialize Protocol — Level 1</h3>
@@ -196,12 +360,10 @@
     <div class="onboard-grid" id="onboardGrid"></div>
     <div class="modal-actions">
       <button class="btn" id="onboardCancel" style="display:none">Cancel</button>
-      <button class="btn" style="background:linear-gradient(90deg,var(--neon1),var(--neon2));color:white;border-color:transparent" id="onboardSave">Initialize →</button>
+      <button class="btn" id="onboardSave">Initialize →</button>
     </div>
   </div>
 </div>
-
-<!-- Add Task Modal -->
 <div class="modal" id="addModal">
   <div class="modal-card">
     <h3>Add custom task</h3>
@@ -212,28 +374,26 @@
     <div class="field"><label>Description</label><textarea id="addDesc" rows="2" placeholder="e.g., 20 min walk after dinner"></textarea></div>
     <div class="modal-actions">
       <button class="btn" id="cancelAdd">Cancel</button>
-      <button class="btn" style="background:linear-gradient(90deg,var(--neon1),var(--neon2));color:white;border-color:transparent" id="confirmAdd">Add task</button>
+      <button class="btn" id="confirmAdd">Add task</button>
     </div>
   </div>
 </div>
-
 <div class="toast" id="toast">Saved</div>
-
 <script>
 const STAT_KEYS=["hydration","nutrition","training","recovery","deepWork","discipline","reading","activeRecall"];
 const STAT_LABELS=["Hydration","Nutrition","Training","Recovery","Deep Work","Discipline","Reading","Active Recall"];
 const DEFAULTS=[
-  { id:'h1', cat:'Health Infrastructure', color:'#00D4FF', tasks:[
+  { id:'h1', cat:'Health Infrastructure', color:'#ffffff', tasks:[
     { id:'t1', title:'Hydration', desc:'Drink 3–4 liters of water.', stat:'hydration'},
     { id:'t2', title:'Nutrition', desc:'Hit 2500-calorie and strict protein targets.', stat:'nutrition'},
     { id:'t3', title:'Training', desc:'Complete heavy lifting session (track progressive overload).', stat:'training'},
     { id:'t4', title:'Recovery', desc:'Sleep 7–8 hours.', stat:'recovery'},
   ]},
-  { id:'h2', cat:'Skill Development', color:'#A855F7', tasks:[
+  { id:'h2', cat:'Skill Development', color:'#ffffff', tasks:[
     { id:'t5', title:'Deep Work', desc:'45 minutes of focused skill acquisition — Coding / Editing / Design.', stat:'deepWork'},
     { id:'t6', title:'Discipline', desc:'Leisure / Entertainment strictly capped at 1–2 hours.', stat:'discipline'},
   ]},
-  { id:'h3', cat:'Academic Prep', color:'#22C55E', tasks:[
+  { id:'h3', cat:'Academic Prep', color:'#ffffff', tasks:[
     { id:'t7', title:'Core Reading', desc:'Read 10–15 pages of primary texts.', stat:'reading'},
     { id:'t8', title:'Active Recall', desc:'20–30 minutes of spaced repetition / flashcards.', stat:'activeRecall'},
   ]},
@@ -241,14 +401,12 @@ const DEFAULTS=[
 const LS_TASKS='winterarc-tasks-v2', LS_CHECKS='winterarc-checks-v2', LS_STATS='winterarc-stats-v2', LS_STREAK='winterarc-streak', LS_LAST='winterarc-last100';
 let DATA=[], CHECKS={}, STATS=null, STREAK=0, LAST_100=null, AUTH={authenticated:false};
 let chart=null, saveTimer=null;
-
 function clone(o){ return JSON.parse(JSON.stringify(o));}
 function escapeHtml(s){ return s.replace(/[&<>"]/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));}
 function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toast._id); toast._id=setTimeout(()=>t.classList.remove('show'),1700); }
 function todayStr(){ return new Date().toISOString().slice(0,10); }
 function yesterdayStr(){ const d=new Date(); d.setDate(d.getDate()-1); return d.toISOString().slice(0,10); }
 function avgLevel(){ const v=STAT_KEYS.map(k=>STATS[k]||5); return (v.reduce((a,b)=>a+b,0)/v.length).toFixed(1); }
-
 async function fetchAuth(){ try{ const r=await fetch('/api/me',{credentials:'include'}); return await r.json(); }catch{ return {authenticated:false}; } }
 async function fetchCloud(){
   const r=await fetch('/api/winterarc',{credentials:'include'});
@@ -261,7 +419,7 @@ async function saveCloud(){
   saveTimer=setTimeout(async()=>{
     try{
       const res=await fetch('/api/winterarc',{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:DATA,checks:CHECKS,stats:STATS,streak:STREAK,last_100_date:LAST_100})});
-      if(res.ok){ document.getElementById('storagePill').textContent='Cloud synced'; document.getElementById('storagePill').className='pill cloud'; }
+      if(res.ok){ document.getElementById('storagePill').textContent='Cloud synced'; }
     }catch{}
   },400);
 }
@@ -277,7 +435,6 @@ function saveAll(){
   if(AUTH.authenticated) saveCloud();
   else { saveLocal(); }
 }
-
 function loadLocal(){
   try{
     const raw=localStorage.getItem(LS_TASKS);
@@ -288,7 +445,6 @@ function loadLocal(){
       const hasCustom = JSON.stringify(saved).length > JSON.stringify(DEFAULTS).length+50;
       if(hasCustom){
         data=clone(saved);
-        // ensure missing defaults added
         const ids=new Set(data.flatMap(c=>c.tasks.map(t=>t.id)));
         DEFAULTS.forEach(cat=>{
           let target=data.find(c=>c.id===cat.id);
@@ -312,7 +468,6 @@ function loadLocal(){
     return {data,checks,stats,streak,last};
   }catch{ return {data:clone(DEFAULTS),checks:{},stats:null,streak:0,last:null}; }
 }
-
 function initChart(){
   const ctx=document.getElementById('radar').getContext('2d');
   const vals=STAT_KEYS.map(k=>STATS?STATS[k]:5);
@@ -323,11 +478,11 @@ function initChart(){
       datasets:[{
         label:'Stats',
         data:vals,
-        backgroundColor:'rgba(0,212,255,0.12)',
-        borderColor:'rgba(0,212,255,1)',
-        borderWidth:2,
-        pointBackgroundColor:'rgba(124,58,237,1)',
-        pointBorderColor:'#fff',
+        backgroundColor:'rgba(255,255,255,0.06)',
+        borderColor:'rgba(255,255,255,1)',
+        borderWidth:1.5,
+        pointBackgroundColor:'#ffffff',
+        pointBorderColor:'#000',
         pointRadius:3,
         pointHoverRadius:5,
       }]
@@ -339,13 +494,13 @@ function initChart(){
       scales:{
         r:{
           min:0,max:10,
-          ticks:{ stepSize:2, backdropColor:'transparent', color:'#64748B', font:{family:'JetBrains Mono', size:10}, showLabelBackdrop:false},
-          grid:{ color:'rgba(255,255,255,0.06)'},
-          angleLines:{ color:'rgba(255,255,255,0.06)'},
-          pointLabels:{ color:'#E2E8F0', font:{family:'Space Grotesk', size:11, weight:600}}
+          ticks:{ stepSize:2, backdropColor:'transparent', color:'#666', font:{family:'JetBrains Mono', size:10}, showLabelBackdrop:false},
+          grid:{ color:'#262626'},
+          angleLines:{ color:'#262626'},
+          pointLabels:{ color:'#cccccc', font:{family:'Saira Condensed', size:11}}
         }
       },
-      plugins:{ legend:{display:false}, tooltip:{enabled:true, backgroundColor:'rgba(15,18,26,0.9)', titleFont:{family:'Space Grotesk'}, bodyFont:{family:'Inter'}}},
+      plugins:{ legend:{display:false}, tooltip:{enabled:true, backgroundColor:'rgba(31,31,31,0.95)', titleFont:{family:'Saira Condensed'}, bodyFont:{family:'Cormorant Garamond'}}},
       elements:{line:{tension:0.12}}
     }
   });
@@ -356,13 +511,12 @@ function updateChart(){
   clearTimeout(chartDebounce);
   chartDebounce=setTimeout(()=>{
     chart.data.datasets[0].data=STAT_KEYS.map(k=>STATS[k]);
-    chart.update('none'); // no animation queue → snappy, no lag
+    chart.update('none');
     document.getElementById('levelBadge').textContent='LVL '+Math.floor(avgLevel())+' • '+avgLevel()+' avg';
     const mini=document.getElementById('statsMini');
     mini.innerHTML=STAT_KEYS.map(k=>`<div class="mini"><b>${STATS[k].toFixed(1)}</b><span>${k}</span></div>`).join('');
   }, 60);
 }
-
 function updateStreakUI(animate=false){
   document.getElementById('streakNum').textContent=STREAK;
   document.getElementById('bigStreak').textContent=STREAK;
@@ -373,21 +527,19 @@ function updateStreakUI(animate=false){
   if(STREAK===0) detail.textContent='No streak yet — complete all '+DATA.reduce((a,c)=>a+c.tasks.length,0)+' today to start.';
   else detail.textContent=STREAK===1? '1 consecutive 100% day — keep it alive tomorrow.' : `${STREAK} consecutive 100% days — locked in.`;
 }
-
 function checkStreakOnProgress(){
   const total=DATA.reduce((a,c)=>a+c.tasks.length,0);
   const done=Object.values(CHECKS).filter(Boolean).length;
   const pct=total?Math.round(done/total*100):0;
   if(pct===100){
     const today=todayStr();
-    if(LAST_100===today) return; // already counted today
+    if(LAST_100===today) return;
     const yest=yesterdayStr();
     let newStreak=1;
     if(LAST_100===yest) newStreak=STREAK+1;
     else if(LAST_100===today) newStreak=STREAK;
     else if(!LAST_100) newStreak=1;
     else {
-      // gap >1 day → reset to 1
       const diffDays = (new Date(today)-new Date(LAST_100))/(1000*60*60*24);
       newStreak = diffDays===1 ? STREAK+1 : 1;
       if(diffDays>1 && STREAK>0) toast('Streak reset — missed day. Starting new run.');
@@ -397,18 +549,14 @@ function checkStreakOnProgress(){
       STREAK=newStreak; LAST_100=today;
       saveAll();
       updateStreakUI(newStreak>prev);
-      if(newStreak>prev) toast(`🔥 Streak ${newStreak}!`);
+      if(newStreak>prev) toast(`Streak ${newStreak}!`);
     }
   }
-  // if not 100%, check if gap caused reset: if last was 2+ days ago, streak should be 0
-  // On load, we handle this separately
 }
-
 function handleMissedStreakOnLoad(){
   if(!LAST_100 || STREAK===0) return;
   const today=todayStr();
   if(LAST_100===today || LAST_100===yesterdayStr()) return;
-  // gap >1 day and not completed today → streak broken
   const diff=(new Date(today)-new Date(LAST_100))/(1000*60*60*24);
   if(diff>1){
     STREAK=0;
@@ -416,7 +564,6 @@ function handleMissedStreakOnLoad(){
     toast('Streak reset to 0 — missed day');
   }
 }
-
 function render(){
   const grid=document.getElementById('grid');
   grid.innerHTML='';
@@ -428,12 +575,10 @@ function render(){
   document.getElementById('pctLabel').textContent=pct+'%';
   document.getElementById('progressText').textContent=pct+'% complete';
   document.getElementById('fill').style.width=pct+'%';
-  document.getElementById('fill').classList.toggle('anim',pct>0&&pct<100);
-
   DATA.forEach(cat=>{
     const doneInCat=cat.tasks.filter(t=>CHECKS[t.id]).length;
     const card=document.createElement('section'); card.className='card';
-    card.innerHTML=`<div class="card-head"><div class="card-title"><span class="dot" style="background:${cat.color};color:${cat.color}"></span> ${cat.cat}</div><span class="count">${doneInCat}/${cat.tasks.length}</span></div><div class="tasks"></div><div class="card-foot"><button class="add-btn" data-cat="${cat.id}">+ Add task</button></div>`;
+    card.innerHTML=`<div class="card-head"><div class="card-title"><span class="dot" style="background:${cat.color};color:${cat.color}"></span> ${escapeHtml(cat.cat)}</div><span class="count">${doneInCat}/${cat.tasks.length}</span></div><div class="tasks"></div><div class="card-foot"><button class="add-btn" data-cat="${cat.id}">+ Add task</button></div>`;
     const tasksEl=card.querySelector('.tasks');
     cat.tasks.forEach(t=>{
       const isDone=!!CHECKS[t.id];
@@ -441,7 +586,7 @@ function render(){
       row.innerHTML=`
         <input type="checkbox" class="cb" ${isDone?'checked':''} aria-label="toggle">
         <div class="task-main">
-          <div class="task-title"><span class="label">${escapeHtml(t.title)}</span> <span style="font-size:10px;padding:2px 6px;border-radius:999px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.08);font-family:'JetBrains Mono',monospace;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted)">${escapeHtml(t.stat||'')}</span></div>
+          <div class="task-title"><span class="label">${escapeHtml(t.title)}</span> <span>${escapeHtml(t.stat||'')}</span></div>
           <div class="task-desc" data-field="desc" spellcheck="false">${escapeHtml(t.desc)}</div>
         </div>
         <div class="task-actions">
@@ -456,7 +601,6 @@ function render(){
       cb.addEventListener('change',()=>{
         const wasDone=!!CHECKS[t.id];
         CHECKS[t.id]=cb.checked;
-        // RPG progression: increment stat on check, decrement on uncheck (clamped 1-10)
         const key=t.stat||'hydration';
         if(STATS && STAT_KEYS.includes(key)){
           if(cb.checked && !wasDone){
@@ -469,7 +613,6 @@ function render(){
         saveAll(); row.classList.toggle('done',cb.checked); updateProgress();
         checkStreakOnProgress();
         if(navigator.vibrate) navigator.vibrate(10);
-        cb.style.transform='scale(1.15)'; setTimeout(()=>cb.style.transform='',120);
       });
       function startEdit(){ desc.contentEditable='true'; desc.focus(); const r=document.createRange(); r.selectNodeContents(desc); r.collapse(false); const s=window.getSelection(); s.removeAllRanges(); s.addRange(r); editBtn.textContent='✓'; }
       function stopEdit(){
@@ -483,7 +626,7 @@ function render(){
       const titleEl=row.querySelector('.task-title .label');
       titleEl.addEventListener('dblclick',()=>{
         const input=document.createElement('input'); input.value=t.title;
-        input.style.cssText='font:600 13.5px Inter,sans-serif;background:rgba(255,255,255,0.08);border:1px solid rgba(0,212,255,0.35);color:white;border-radius:8px;padding:4px 8px;width:100%';
+        input.style.cssText='font:400 15px Saira Condensed,sans-serif;background:transparent;border:none;border-bottom:1px solid #fff;color:white;padding:4px 0;width:100%;letter-spacing:1px;text-transform:uppercase';
         titleEl.replaceWith(input); input.focus(); input.select();
         const save=()=>{ const v=input.value.trim()||t.title; t.title=v; saveAll(); render(); };
         input.addEventListener('blur',save); input.addEventListener('keydown',e=>{ if(e.key==='Enter') save(); if(e.key==='Escape') render(); });
@@ -498,7 +641,6 @@ function render(){
     grid.appendChild(card);
   });
 }
-
 function updateProgress(){
   const total=DATA.reduce((a,c)=>a+c.tasks.length,0);
   const done=Object.values(CHECKS).filter(Boolean).length;
@@ -510,11 +652,8 @@ function updateProgress(){
   document.querySelectorAll('.card .count').forEach((el,i)=>{
     if(DATA[i]){ const cat=DATA[i]; const d=cat.tasks.filter(t=>CHECKS[t.id]).length; el.textContent=`${d}/${cat.tasks.length}`; }
   });
-  document.getElementById('fill').classList.toggle('anim',pct>0&&pct<100);
-  if(pct===100) toast(AUTH.authenticated?'Protocol 100% — streak & stats saved to cloud 🔥':'Protocol 100% 🔥');
+  if(pct===100) toast(AUTH.authenticated?'Protocol 100% — streak & stats saved to cloud':'Protocol 100%');
 }
-
-// Onboarding
 function showOnboarding(){
   const grid=document.getElementById('onboardGrid');
   grid.innerHTML='';
@@ -522,7 +661,7 @@ function showOnboarding(){
     const row=document.createElement('div'); row.className='slider-row';
     row.innerHTML=`<label>${STAT_LABELS[i]}</label><input type="range" min="1" max="10" value="5" step="1" data-key="${k}"><span class="slider-val">5</span>`;
     const range=row.querySelector('input'); const val=row.querySelector('.slider-val');
-    range.addEventListener('input',()=>{ val.textContent=range.value; val.style.color=range.value>=8?'#22C55E':range.value>=5?'#00D4FF':'#F59E0B'; });
+    range.addEventListener('input',()=>{ val.textContent=range.value; });
     grid.appendChild(row);
   });
   document.getElementById('onboardModal').classList.add('open');
@@ -532,15 +671,12 @@ document.getElementById('onboardSave').addEventListener('click',()=>{
   document.querySelectorAll('#onboardGrid input').forEach(inp=>{ vals[inp.dataset.key]=parseInt(inp.value,10); });
   STATS=vals;
   document.getElementById('onboardModal').classList.remove('open');
-  initChart(); updateChart(); saveAll(); render(); toast('Level 1 initialized — welcome to the Arc');
+  initChart(); updateChart(); saveAll(); render(); toast('Level 1 initialized');
 });
-
-// Add task modal
 const addModal=document.getElementById('addModal');
 function openAdd(catId){
   const sel=document.getElementById('addCat'); sel.innerHTML=''; DATA.forEach(c=>{ const o=document.createElement('option'); o.value=c.id; o.textContent=c.cat; sel.appendChild(o); }); sel.value=catId;
   const sSel=document.getElementById('addStat'); sSel.innerHTML=''; STAT_KEYS.forEach((k,i)=>{ const o=document.createElement('option'); o.value=k; o.textContent=STAT_LABELS[i]; sSel.appendChild(o); });
-  // preselect stat based on cat
   const cat=DATA.find(c=>c.id===catId);
   if(cat && cat.tasks[0]) sSel.value=cat.tasks[0].stat||STAT_KEYS[0];
   document.getElementById('addTitle').value=''; document.getElementById('addDesc').value='';
@@ -560,13 +696,11 @@ document.getElementById('confirmAdd').addEventListener('click',()=>{
   cat.tasks.push(newTask);
   saveAll(); addModal.classList.remove('open'); render(); toast(AUTH.authenticated?'Task added — cloud':'Task added');
 });
-
 document.getElementById('resetBtn').addEventListener('click',async()=>{
   if(!confirm('Reset all checks, custom tasks, and Level 1 stats?')) return;
   if(AUTH.authenticated){
     DATA=clone(DEFAULTS); CHECKS={}; STATS=null; STREAK=0; LAST_100=null;
     localStorage.clear();
-    // show onboarding again
     showOnboarding();
     await saveCloud();
     render();
@@ -577,12 +711,10 @@ document.getElementById('resetBtn').addEventListener('click',async()=>{
     render();
   }
 });
-
 async function init(){
   document.getElementById('dateStr').textContent=new Date().toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'});
   AUTH=await fetchAuth();
   const authArea=document.getElementById('authArea');
-  // manage auth UI
   const oldUser=document.getElementById('userPill'); if(oldUser) oldUser.remove();
   const oldLogout=document.getElementById('logoutBtn'); if(oldLogout) oldLogout.remove();
   const googleBtn=document.getElementById('googleBtn');
@@ -590,47 +722,38 @@ async function init(){
   if(AUTH.authenticated){
     googleBtn.style.display='none';
     localStorage.removeItem(LS_TASKS); localStorage.removeItem(LS_CHECKS); localStorage.removeItem(LS_STATS); localStorage.removeItem(LS_STREAK); localStorage.removeItem(LS_LAST);
-    storagePill.textContent='Cloud synced'; storagePill.className='pill cloud';
+    storagePill.textContent='Cloud synced';
     document.getElementById('footerMode').textContent='Cloud-synced • '+AUTH.email;
     const userPill=document.createElement('div'); userPill.id='userPill'; userPill.className='user-pill';
-    const pic=AUTH.picture? `<img src="${AUTH.picture}" alt="">` : `<div style="width:26px;height:26px;border-radius:999px;background:linear-gradient(135deg,var(--neon1),var(--neon2));display:grid;place-items:center;font-size:12px;font-weight:800">${(AUTH.name||AUTH.email||'U')[0].toUpperCase()}</div>`;
+    const pic=AUTH.picture? `<img src="${AUTH.picture}" alt="">` : `<div style="width:40px;height:40px;display:grid;place-items:center;font-family:JetBrains Mono,monospace;font-size:12px;border-right:1px solid #262626">${(AUTH.name||AUTH.email||'U')[0].toUpperCase()}</div>`;
     userPill.innerHTML=pic+`<span>${escapeHtml(AUTH.name||AUTH.email)}</span>`;
     const logout=document.createElement('a'); logout.id='logoutBtn'; logout.className='btn'; logout.href='/auth/logout'; logout.textContent='Log out';
     authArea.appendChild(userPill); authArea.appendChild(logout);
     const cloud=await fetchCloud();
     if(cloud){
       DATA=cloud.data||clone(DEFAULTS); CHECKS=cloud.checks||{}; STATS=cloud.stats||null; STREAK=cloud.streak||0; LAST_100=cloud.last_100_date||null;
-      // ensure data integrity for stat fields
       DATA.forEach(cat=>cat.tasks.forEach(t=>{ if(!t.stat) t.stat=STAT_KEYS[0]; }));
     } else {
       DATA=clone(DEFAULTS); CHECKS={}; STATS=null; STREAK=0; LAST_100=null;
     }
   } else {
     googleBtn.style.display='flex';
-    storagePill.textContent='Local'; storagePill.className='pill local';
+    storagePill.textContent='Local';
     document.getElementById('footerMode').textContent='Local — sign in for cloud';
     const local=loadLocal();
     DATA=local.data; CHECKS=local.checks; STATS=local.stats; STREAK=local.streak; LAST_100=local.last;
   }
-
-  // onboarding check
   if(!STATS){
     showOnboarding();
-    // init chart with defaults 5 after onboarding will update
     STATS=Object.fromEntries(STAT_KEYS.map(k=>[k,5]));
   }
-  // ensure STATS has all keys
   STAT_KEYS.forEach(k=>{ if(!(k in STATS)) STATS[k]=5; });
-
   handleMissedStreakOnLoad();
   initChart(); updateChart(); updateStreakUI(false);
-  // populate add selects
   const sel=document.getElementById('addCat'); if(sel){ sel.innerHTML=''; DATA.forEach(c=>{ const o=document.createElement('option'); o.value=c.id; o.textContent=c.cat; sel.appendChild(o); }); }
   render();
-  // initial progress check for streak
   checkStreakOnProgress();
 }
-
 init();
 window.WINTERARC={get DATA(){return DATA}, get CHECKS(){return CHECKS}, get STATS(){return STATS}, get AUTH(){return AUTH}};
 </script>
