@@ -35,17 +35,54 @@
   }
   a{color:var(--link)}
   .wrap{max-width:1280px;margin:0 auto;padding:0 40px}
-  @media (max-width:768px){.wrap{padding:0 20px}}
+  @media (max-width:768px){.wrap{padding:0 16px}}
   header{
     position:sticky;top:0;z-index:20;
-    height:56px;
+    min-height:56px;
     background:var(--canvas);
     border-bottom:1px solid var(--hairline);
     display:flex;align-items:center;
+    padding:8px 0;
   }
   header .wrap{width:100%}
   .header-inner{padding:0}
   .title-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  /* header — desktop */
+  .mob-toggle{display:none;width:40px;height:40px;border-radius:9999px;border:1px solid var(--text);background:transparent;color:var(--text);place-items:center;cursor:pointer;font-size:18px;line-height:1;flex-shrink:0}
+  .mob-toggle:hover{background:var(--text);color:#000}
+  .mob-menu{display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface-card);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);padding:14px 20px;flex-direction:column;gap:8px;z-index:15;box-shadow:0 12px 24px rgba(0,0,0,0.6)}
+  .mob-menu.open{display:flex}
+  .mob-menu a,.mob-menu button.mob-link{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:12px 14px;border:1px solid var(--hairline);background:transparent;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .mob-menu a:hover,.mob-menu button.mob-link:hover{color:var(--text);border-color:var(--text);background:rgba(255,255,255,0.04)}
+  .mob-menu .mob-meta{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted-soft);padding:8px 2px 2px;display:flex;flex-wrap:wrap;gap:8px}
+  .mob-menu .mob-meta span{border:1px solid var(--hairline);padding:4px 8px}
+  /* header mobile — opaque, bigger, firefox safe-area, dropdown only */
+  @media (max-width:768px){
+    header{min-height:72px;padding:16px 0;padding-top:max(16px, env(safe-area-inset-top));background:#000;background-color:#000;opacity:1;isolation:isolate;box-shadow:0 1px 0 var(--hairline), 0 8px 24px rgba(0,0,0,0.45)}
+    header .wrap{position:relative}
+    .header-inner{position:static}
+    .title-row{flex-direction:row;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap}
+    .brand{flex:1;min-width:0}
+    .brand h1{font-size:13.5px;letter-spacing:5px;line-height:1.1}
+    .brand p{font-size:10px;letter-spacing:1.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:6px}
+    .header-actions{gap:8px;justify-content:flex-end;align-items:center;flex-shrink:0;margin-left:auto;flex-wrap:nowrap}
+    /* mobile: only Sign in (+ user pill when authed) visible in bar — rest moves to dropdown */
+    .header-actions .pill,.header-actions .streak,#countPill,#streakPill,#storagePill,#resetBtn{display:none !important}
+    .header-actions .btn.google, .header-actions #googleBtn{display:inline-flex !important;margin-left:auto;min-width:92px;justify-content:center;align-items:center;height:36px;padding:0 18px;font-size:11px;letter-spacing:1.5px}
+    #authArea .user-pill{height:36px}
+    #authArea .user-pill img{width:36px;height:36px}
+    #authArea .user-pill span{max-width:90px;font-size:10px}
+    #logoutBtn{display:none !important}
+    .mob-toggle{display:grid}
+    .hero-band{padding-top:48px}
+  }
+  @media (max-width:380px){
+    header{min-height:68px;padding:14px 0;padding-top:max(14px, env(safe-area-inset-top))}
+    .brand h1{font-size:12.5px;letter-spacing:4px}
+    .brand p{font-size:9px;letter-spacing:1px}
+    .header-actions .btn.google, .header-actions #googleBtn{min-width:78px;height:34px;font-size:10px;padding:0 12px}
+    .mob-toggle{width:36px;height:36px;font-size:16px}
+  }
   .brand h1{
     margin:0;
     font-family:"Saira Condensed", sans-serif;
@@ -240,11 +277,42 @@
     border:1px solid var(--hairline);background:transparent;
     color:var(--body);font-family:"Cormorant Garamond", serif;font-size:14px;line-height:1.5;
   }
-  footer{padding:64px 0;border-top:1px solid var(--hairline);margin-top:40px}
+  footer{padding:48px 0 64px;border-top:1px solid var(--hairline);margin-top:40px}
   .footer-row{
-    display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;
+    display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap;
     color:var(--muted);font-family:"JetBrains Mono", monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;
   }
+  .footer-links{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  .footer-links a{color:var(--muted);text-decoration:none;border-bottom:1px solid transparent;padding-bottom:2px;transition:color .15s,border-color .15s}
+  .footer-links a:hover{color:var(--text);border-bottom-color:var(--text)}
+  .footer-links span{color:var(--hairline-strong)}
+  .footer-bottom{margin-top:16px;padding-top:16px;border-top:1px solid var(--hairline);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted-soft);font-family:"JetBrains Mono", monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase}
+  @media (max-width:768px){
+    footer{padding:32px 0 40px}
+    .footer-row{flex-direction:column;align-items:flex-start;gap:12px}
+    .footer-links{gap:12px}
+    .footer-bottom{flex-direction:column;gap:8px}
+  }
+  /* legal pages */
+  .legal-wrap{max-width:720px;margin:0 auto;padding:64px 40px 80px}
+  @media (max-width:768px){.legal-wrap{padding:40px 20px 60px}}
+  .legal-wrap h1{font-family:"Saira Condensed",sans-serif;font-size:32px;letter-spacing:3px;text-transform:uppercase;font-weight:400;margin:0 0 8px}
+  @media (max-width:768px){.legal-wrap h1{font-size:24px;letter-spacing:2px}}
+  .legal-wrap .legal-meta{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:32px}
+  .legal-wrap h2{font-family:"Saira Condensed",sans-serif;font-size:18px;letter-spacing:1.5px;text-transform:uppercase;font-weight:400;margin:32px 0 12px;padding-top:24px;border-top:1px solid var(--hairline)}
+  .legal-wrap p,.legal-wrap li{font-family:"Cormorant Garamond",serif;font-size:15px;line-height:1.7;color:var(--body)}
+  .legal-wrap ul{padding-left:20px}
+  .legal-wrap li{margin-bottom:8px}
+  .legal-wrap a{color:var(--text);text-decoration:underline;text-underline-offset:3px}
+  .back-link{display:inline-flex;align-items:center;gap:6px;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--hairline);padding:8px 14px;margin-bottom:24px}
+  .back-link:hover{color:var(--text);border-color:var(--text)}
+  /* faq accordion */
+  .faq-item{border:1px solid var(--hairline);margin-bottom:12px;background:var(--surface-card)}
+  .faq-q{width:100%;text-align:left;background:transparent;border:none;color:var(--text);padding:16px 20px;font-family:"Saira Condensed",sans-serif;font-size:15px;letter-spacing:1px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer}
+  .faq-q span:last-child{font-family:"JetBrains Mono",monospace;font-size:14px;color:var(--muted);transition:transform .2s}
+  .faq-item.open .faq-q span:last-child{transform:rotate(45deg)}
+  .faq-a{display:none;padding:0 20px 16px;font-family:"Cormorant Garamond",serif;font-size:15px;line-height:1.6;color:var(--body)}
+  .faq-item.open .faq-a{display:block}
   .toast{
     position:fixed;left:50%;bottom:32px;transform:translateX(-50%);
     background:var(--surface-elevated);border:1px solid var(--hairline-strong);
@@ -312,8 +380,16 @@
           <span class="pill" id="storagePill">Local</span>
           <button class="btn" id="resetBtn">Reset</button>
           <a class="btn google" id="googleBtn" href="/auth/google">Sign in</a>
+          <button class="mob-toggle" id="mobMenuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="mobMenu">☰</button>
         </div>
       </div>
+      <nav class="mob-menu" id="mobMenu" aria-label="Mobile menu">
+        <a href="/terms">Terms <span>→</span></a>
+        <a href="/privacy">Guidelines / Privacy <span>→</span></a>
+        <a href="/faq">FAQs <span>→</span></a>
+        <button class="mob-link" id="mobResetBtn" type="button">Reset Protocol <span>↺</span></button>
+        <div class="mob-meta" id="mobMeta"><span id="mobCount">0/0 • 0%</span><span id="mobStreak">Streak 0</span><span id="mobStorage">Local</span></div>
+      </nav>
     </div>
   </div>
 </header>
@@ -361,7 +437,18 @@
 <footer class="wrap">
   <div class="footer-row">
     <span>© Winter Arc — Stay locked in.</span>
+    <nav class="footer-links" aria-label="Legal">
+      <a href="/terms">Terms</a>
+      <span>·</span>
+      <a href="/privacy">Privacy</a>
+      <span>·</span>
+      <a href="/faq">FAQ</a>
+    </nav>
     <span id="footerMode">Cloud-synced when signed in</span>
+  </div>
+  <div class="footer-bottom">
+    <span>Minimal. Austere. Execution over aesthetics.</span>
+    <span>Built for the Winter Arc — focus, discipline, execution.</span>
   </div>
 </footer>
 <div class="modal" id="onboardModal">
@@ -440,6 +527,46 @@ const DEFAULTS=[
 const LS_TASKS='winterarc-tasks-v2', LS_CHECKS='winterarc-checks-v2', LS_STATS='winterarc-stats-v2', LS_STREAK='winterarc-streak', LS_LAST='winterarc-last100', LS_STAT_DEFS='winterarc-stat-defs-v1';
 let DATA=[], CHECKS={}, STATS=null, STREAK=0, LAST_100=null, AUTH={authenticated:false};
 let chart=null, saveTimer=null;
+
+// --- mobile dropdown (mobile-only) ---
+function syncMobMeta(){
+  const total=DATA.reduce((a,c)=>a+c.tasks.length,0);
+  const done=Object.values(CHECKS).filter(Boolean).length;
+  const pct=total?Math.round(done/total*100):0;
+  const mc=document.getElementById('mobCount');
+  const ms=document.getElementById('mobStreak');
+  const mst=document.getElementById('mobStorage');
+  if(mc) mc.textContent=done+'/'+total+' • '+pct+'%';
+  if(ms) ms.textContent='Streak '+STREAK;
+  if(mst) mst.textContent=AUTH.authenticated?'Cloud':'Local';
+}
+function setupMobMenu(){
+  const btn=document.getElementById('mobMenuBtn');
+  const menu=document.getElementById('mobMenu');
+  const mobReset=document.getElementById('mobResetBtn');
+  if(!btn||!menu) return;
+  btn.addEventListener('click',()=>{
+    const open=menu.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open?'true':'false');
+    btn.textContent=open?'✕':'☰';
+    if(open) syncMobMeta();
+  });
+  document.addEventListener('click',(e)=>{
+    if(!menu.classList.contains('open')) return;
+    if(menu.contains(e.target)||btn.contains(e.target)) return;
+    menu.classList.remove('open');
+    btn.setAttribute('aria-expanded','false');
+    btn.textContent='☰';
+  });
+  if(mobReset){
+    mobReset.addEventListener('click',()=>{
+      menu.classList.remove('open');
+      btn.setAttribute('aria-expanded','false');
+      btn.textContent='☰';
+      document.getElementById('resetBtn')?.click();
+    });
+  }
+}
 
 function clone(o){ return JSON.parse(JSON.stringify(o));}
 function escapeHtml(s){ return s.replace(/[&<>"]/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));}
@@ -799,6 +926,7 @@ function updateProgress(){
     if(DATA[i]){ const cat=DATA[i]; const d=cat.tasks.filter(t=>CHECKS[t.id]).length; el.textContent=`${d}/${cat.tasks.length}`; }
   });
   if(pct===100) toast(AUTH.authenticated?'Protocol 100% — streak & stats saved to cloud':'Protocol 100%');
+  try{ syncMobMeta(); }catch{}
 }
 function showOnboarding(){
   const grid=document.getElementById('onboardGrid');
@@ -1014,6 +1142,7 @@ async function init(){
   updateStreakUI(false);
   render();
   checkStreakOnProgress();
+  try{ setupMobMenu(); syncMobMeta(); }catch{}
 }
 init();
 window.WINTERARC={get DATA(){return DATA}, get CHECKS(){return CHECKS}, get STATS(){return STATS}, get AUTH(){return AUTH}, get STAT_KEYS(){return STAT_KEYS}, get STAT_LABELS(){return STAT_LABELS}};

@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>WINTER ARC — FAQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@400;500&family=Cormorant+Garamond:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root{--canvas:#000000;--surface-card:#141414;--surface-elevated:#1f1f1f;--hairline:#262626;--hairline-strong:#3a3a3a;--text:#ffffff;--body:#cccccc;--muted:#999999;--muted-soft:#666666;}
+  *{box-sizing:border-box} html,body{height:100%} body{margin:0;background:var(--canvas);color:var(--text);font-family:"Cormorant Garamond",serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .wrap{max-width:1280px;margin:0 auto;padding:0 40px} @media(max-width:768px){.wrap{padding:0 16px}}
+  header{position:sticky;top:0;z-index:20;min-height:56px;background:var(--canvas);border-bottom:1px solid var(--hairline);display:flex;align-items:center;padding:8px 0}
+  header .wrap{width:100%} .header-inner{padding:0} .title-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand h1{margin:0;font-family:"Saira Condensed",sans-serif;font-weight:400;font-size:14px;letter-spacing:6px;text-transform:uppercase;line-height:1}
+  .brand h1 a{color:var(--text);text-decoration:none}
+  .brand p{margin:4px 0 0;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+  .header-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .btn{appearance:none;cursor:pointer;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:8px 16px;height:32px;border-radius:9999px;background:transparent;color:var(--text);border:1px solid var(--text);display:inline-flex;align-items:center;justify-content:center;text-decoration:none;transition:background .15s,color .15s}
+  .btn:hover{background:var(--text);color:#000}
+  @media(max-width:768px){header{padding:12px 0} .title-row{flex-direction:column;align-items:stretch;gap:12px} .brand h1{font-size:13px;letter-spacing:5px} .brand p{font-size:10px;letter-spacing:1.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .header-actions{gap:6px}}
+  footer{padding:48px 0 64px;border-top:1px solid var(--hairline);margin-top:40px}
+  .footer-row{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap;color:var(--muted);font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase}
+  .footer-links{display:flex;gap:16px;align-items:center;flex-wrap:wrap} .footer-links a{color:var(--muted);text-decoration:none;border-bottom:1px solid transparent;padding-bottom:2px}
+  .footer-links a:hover{color:var(--text);border-bottom-color:var(--text)} .footer-links a.active{color:var(--text);border-bottom-color:var(--text)} .footer-links span{color:var(--hairline-strong)}
+  .footer-bottom{margin-top:16px;padding-top:16px;border-top:1px solid var(--hairline);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted-soft);font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase}
+  @media(max-width:768px){footer{padding:32px 0 40px} .footer-row{flex-direction:column;align-items:flex-start;gap:12px} .footer-bottom{flex-direction:column;gap:8px}}
+  .legal-wrap{max-width:720px;margin:0 auto;padding:64px 40px 80px} @media(max-width:768px){.legal-wrap{padding:40px 20px 60px}}
+  .legal-wrap h1{font-family:"Saira Condensed",sans-serif;font-size:32px;letter-spacing:3px;text-transform:uppercase;font-weight:400;margin:0 0 8px} @media(max-width:768px){.legal-wrap h1{font-size:24px;letter-spacing:2px}}
+  .legal-wrap .legal-meta{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:32px}
+  .legal-wrap h2{font-family:"Saira Condensed",sans-serif;font-size:18px;letter-spacing:1.5px;text-transform:uppercase;font-weight:400;margin:36px 0 12px;padding-top:24px;border-top:1px solid var(--hairline)}
+  .legal-wrap p,.legal-wrap li{font-family:"Cormorant Garamond",serif;font-size:15px;line-height:1.7;color:var(--body)}
+  .legal-wrap ul{padding-left:20px} .legal-wrap li{margin-bottom:8px} .legal-wrap a{color:var(--text);text-decoration:underline;text-underline-offset:3px}
+  .back-link{display:inline-flex;align-items:center;gap:6px;font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--hairline);padding:8px 14px;margin-bottom:24px}
+  .back-link:hover{color:var(--text);border-color:var(--text)}
+  .faq-item{border:1px solid var(--hairline);margin-bottom:12px;background:var(--surface-card)}
+  .faq-q{width:100%;text-align:left;background:transparent;border:none;color:var(--text);padding:16px 20px;font-family:"Saira Condensed",sans-serif;font-size:15px;letter-spacing:1px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer}
+  .faq-q span:last-child{font-family:"JetBrains Mono",monospace;font-size:16px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+  .faq-item.open .faq-q span:last-child{transform:rotate(45deg)}
+  .faq-a{display:none;padding:0 20px 16px;font-family:"Cormorant Garamond",serif;font-size:15px;line-height:1.6;color:var(--body)}
+  .faq-item.open .faq-a{display:block}
+  .faq-a p{margin:0 0 8px} .faq-a p:last-child{margin:0}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap"><div class="header-inner"><div class="title-row">
+    <div class="brand"><h1><a href="/">WINTER ARC</a></h1><p>Focus • Discipline • Execution</p></div>
+    <div class="header-actions"><a class="btn" href="/">← Back to Protocol</a></div>
+  </div></div></div>
+</header>
+<main class="legal-wrap">
+  <a class="back-link" href="/">← Back to Protocol</a>
+  <h1>Frequently Asked Questions</h1>
+  <div class="legal-meta">Winter Arc Protocol — build, mechanics &amp; usage</div>
+  <p>WINTER ARC is a minimal, austere habit/goal tracker built with <strong style="color:var(--text)">Python + FastAPI</strong>. No color, no chrome — only typography, structure, and execution. Below are the common questions about the build, the Stat Polygon, streaks, and data.</p>
+
+  <h2>Build &amp; Stack</h2>
+
+  <div class="faq-item open">
+    <button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>What is WINTER ARC built with?</span><span>+</span></button>
+    <div class="faq-a"><p>FastAPI (Python 3.12) + Uvicorn, Jinja-free single-page FileResponse, vanilla JS, Chart.js 4.4.1 for the radar polygon, Google Fonts (Saira Condensed, Cormorant Garamond, JetBrains Mono), SQLite (dev) → Postgres (prod), Authlib for Google OAuth, Starlette SessionMiddleware, and Docker/Render for deploy. Styling is custom CSS — no Tailwind runtime, just a Tailwind-like minimal system.</p></div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>Why FastAPI and not Django / Next.js?</span><span>+</span></button>
+    <div class="faq-a"><p>User spec requested Python / FastAPI, and for v1 we wanted server-rendered minimalism with fast auth + API. FastAPI gives type hints, async DB, and quick OAuth wiring. We intentionally avoided a heavy SPA/React build — the entire protocol runs in one HTML file with progressive enhancement.</p></div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>Is there a mobile app?</span><span>+</span></button>
+    <div class="faq-a"><p>No — v1 is web-only, responsive down to 320px. The header stacks and the Stat Polygon + cards collapse to a single column on mobile. Add to Home Screen works as a PWA-like shortcut (no native wrapper). Native apps are deferred to a later version.</p></div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>How is it deployed?</span><span>+</span></button>
+    <div class="faq-a"><p>Dockerfile + Uvicorn on Render (or Fly.io). Gzip middleware for HTML/JS, health check at <code style="font-family:JetBrains Mono,monospace;color:var(--muted)">/health</code>. Static served via FastAPI StaticFiles at <code style="font-family:JetBrains Mono,monospace;color:var(--muted)">/static</code>. Main entry file is <code style="font-family:JetBrains Mono,monospace;color:var(--muted)">winter_arc.html</code> served at <code style="font-family:JetBrains Mono,monospace;color:var(--muted)">/</code>, <code style="font-family:JetBrains Mono,monospace;color:var(--muted)">/arc</code>, <code style="font-family:JetBrains Mono,monospace;color:var(--muted)">/winter-arc</code>. New pages live at <code style="font-family:JetBrains Mono,monospace;color:var(--muted)">/terms</code>, <code style="font-family:JetBrains Mono,monospace;color:var(--muted)">/privacy</code>, <code style="font-family:JetBrains Mono,monospace;color:var(--muted)">/faq</code>.</p></div>
+  </div>
+
+  <h2>Protocol Mechanics</h2>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>How does the Stat Polygon work?</span><span>+</span></button>
+    <div class="faq-a"><p>On first load you set a Level 1 baseline (1–10) for each stat. Each checked task adds +0.18 to its linked stat (capped at 10). Unchecking subtracts 0.18 (floor 1). Average of all stats = your LVL. Use "Edit Stats" to add/rename/remove stats — chart, onboarding, and task stat dropdown update instantly. Defs are synced via <code style="font-family:JetBrains Mono,monospace;color:var(--muted)">STATS._defs</code> for cloud users and localStorage for local users.</p></div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>How are streaks calculated?</span><span>+</span></button>
+    <div class="faq-a"><p>Streak = consecutive days where 100% of tasks are checked. At 100%, we stamp today's date. Next day, if you hit 100% again and last 100% was yesterday, streak increments; otherwise it resets to 1 (or 0 if you missed a day). The small flame pill in the header and the big Streak Protocol card both reflect this. Missing a day resets on next load.</p></div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>What happens when I add custom tasks or cards?</span><span>+</span></button>
+    <div class="faq-a"><p>Tap "+ Add task" inside a card — pick a category and which stat it levels up. "+ Add Card" creates a new category (e.g., Creative Work) with a dot color. Both are persisted instantly (cloud if signed in, otherwise local). The progress bar (Daily protocol) and stat polygon update live. Deleting a task/card removes its checks too.</p></div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>Can I edit task titles and descriptions?</span><span>+</span></button>
+    <div class="faq-a"><p>Yes. Click ✎ to edit the description inline, or double-click a task title or card header to rename. Saves auto-reload (with a hard cache-bust) so you always see the latest without a manual refresh. All edits sync to cloud when signed in.</p></div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>What are the default habits?</span><span>+</span></button>
+    <div class="faq-a"><p>8 habits across 3 cards: Health Infrastructure (Hydration, Nutrition, Training, Recovery), Skill Development (Deep Work, Discipline), Academic Prep (Core Reading, Social Life). Each maps to a stat with the same name. You can rename, delete, or extend them freely.</p></div>
+  </div>
+
+  <h2>Data &amp; Privacy</h2>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>Where is my data stored?</span><span>+</span></button>
+    <div class="faq-a"><p><strong>Not signed in:</strong> entirely in your browser (localStorage keys: winterarc-tasks-v2, winterarc-checks-v2, etc.). We never see it. <strong>Signed in with Google:</strong> synced to our DB via <code style="font-family:JetBrains Mono,monospace;color:var(--muted)">PUT /api/winterarc</code> and loaded via <code style="font-family:JetBrains Mono,monospace;color:var(--muted)">GET /api/winterarc</code>. Switching to cloud clears local copies.</p></div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>How do I export or delete my data?</span><span>+</span></button>
+    <div class="faq-a"><p>Reset button wipes checks, custom tasks, Level 1 stats, and streak (with confirmation). For full cloud deletion, contact support. For export, open DevTools → Application → Local Storage (local mode) or request a JSON dump while signed in.</p></div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>Do you track me or run ads?</span><span>+</span></button>
+    <div class="faq-a"><p>No ads, no trackers, no analytics in the current build. We log only server-level request metadata for stability. No advertising cookies are set. See <a href="/privacy">Privacy Policy</a> for details.</p></div>
+  </div>
+
+  <h2>Troubleshooting</h2>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>Progress bar or chart not updating?</span><span>+</span></button>
+    <div class="faq-a"><p>Try a hard reload (we append ?r=timestamp on saves). If local, check that localStorage isn't full or blocked (private/incognito may limit it). If cloud, check you are signed in — pill should read "Cloud synced". The chart uses Chart.js radar; if canvas was hidden during a modal, we call chart.resize() on update.</p></div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>I need the Terms/Privacy as sublinks for branding</span><span>+</span></button>
+    <div class="faq-a"><p>Use these canonical sublinks (ideal for footer branding uploads): <code style="font-family:JetBrains Mono,monospace;color:var(--muted)">/terms</code>, <code style="font-family:JetBrains Mono,monospace;color:var(--muted)">/privacy</code>, <code style="font-family:JetBrains Mono,monospace;color:var(--muted)">/faq</code>. They are standalone, SEO-friendly HTML with the same WINTER ARC design tokens, sticky header, and responsive footer. Link them in your branding portal or external directory submission.</p></div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q" onclick="this.parentElement.classList.toggle('open')"><span>How do I contact support?</span><span>+</span></button>
+    <div class="faq-a"><p>Email <a href="mailto:support@winterarc.example">support@winterarc.example</a> or <a href="mailto:privacy@winterarc.example">privacy@winterarc.example</a> for privacy requests. Include your account email and a description — we aim to reply within 48 hours.</p></div>
+  </div>
+
+  <p style="margin-top:32px;color:var(--muted-soft);font-size:13px;border-top:1px solid var(--hairline);padding-top:16px">Last updated: Sep 1, 2026. Have a question not listed? Email us and we will add it here.</p>
+</main>
+<footer class="wrap">
+  <div class="footer-row">
+    <span>© Winter Arc — Stay locked in.</span>
+    <nav class="footer-links" aria-label="Legal"><a href="/terms">Terms</a><span>·</span><a href="/privacy">Privacy</a><span>·</span><a href="/faq" class="active">FAQ</a></nav>
+    <span><a href="/" style="text-decoration:none">Back to Protocol →</a></span>
+  </div>
+  <div class="footer-bottom"><span>Ask. Build. Execute.</span><span>FAQ • Sep 2026</span></div>
+</footer>
+</body>
+</html>

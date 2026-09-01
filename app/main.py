@@ -43,6 +43,18 @@ async def arc():
 async def winter_arc():
     return FileResponse(str(BASE_DIR / "winter_arc.html"))
 
+@app.get("/terms", response_class=HTMLResponse)
+async def terms():
+    return FileResponse(str(BASE_DIR / "templates" / "terms.html"))
+
+@app.get("/privacy", response_class=HTMLResponse)
+async def privacy():
+    return FileResponse(str(BASE_DIR / "templates" / "privacy.html"))
+
+@app.get("/faq", response_class=HTMLResponse)
+async def faq():
+    return FileResponse(str(BASE_DIR / "templates" / "faq.html"))
+
 @app.get("/health")
 async def health():
     return {"status": "ok", "app": "WINTERARC", "mode": "winter-arc-cloud"}
