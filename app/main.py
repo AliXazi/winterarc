@@ -55,6 +55,14 @@ async def privacy():
 async def faq():
     return FileResponse(str(BASE_DIR / "templates" / "faq.html"))
 
+@app.get("/sitemap.xml")
+async def sitemap():
+    return FileResponse(str(BASE_DIR / "sitemap.xml"), media_type="application/xml")
+
+@app.get("/robots.txt")
+async def robots():
+    return FileResponse(str(BASE_DIR / "robots.txt"), media_type="text/plain")
+
 @app.get("/health")
 async def health():
     return {"status": "ok", "app": "WINTERARC", "mode": "winter-arc-cloud"}
