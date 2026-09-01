@@ -504,10 +504,12 @@
     <h3>Manage Stats</h3>
     <p>Rename, remove, or add stats. Chart, onboarding, and task stat dropdown update instantly. Deleting a stat removes it from polygon but keeps tasks (reassign). Add stat creates key from label.</p>
     <div id="statsManagerList" class="stats-manager-list"></div>
-    <div style="display:flex;gap:8px;margin-top:12px">
-      <input id="newStatLabel" placeholder="New stat label e.g. Social Life" style="flex:1;padding:12px 0;background:transparent;border:none;border-bottom:1px solid var(--hairline-strong);color:var(--text);font-family:Cormorant Garamond, serif;outline:none">
+    <div style="display:flex;gap:8px;margin-top:12px;align-items:flex-end;flex-wrap:wrap">
+      <input id="newStatLabel" placeholder="New stat label e.g. Social Life" style="flex:1;min-width:180px;padding:12px 0;background:transparent;border:none;border-bottom:1px solid var(--hairline-strong);color:var(--text);font-family:Cormorant Garamond, serif;outline:none">
+      <input id="newStatValue" type="number" min="1" max="10" step="0.5" value="5" placeholder="5" title="Initial value 1–10" style="width:90px;padding:12px 0;background:transparent;border:none;border-bottom:1px solid var(--hairline-strong);color:var(--text);font-family:JetBrains Mono, monospace;font-size:13px;outline:none;text-align:center">
       <button class="btn small" id="addStatBtn">Add Stat</button>
     </div>
+    <div style="font-family:JetBrains Mono,monospace;font-size:10px;letter-spacing:1px;color:var(--muted-soft);margin-top:6px">Value 1–10, default 5 — you set starting polygon value.</div>
     <div class="modal-actions">
       <button class="btn" id="closeStatsBtn">Close</button>
       <button class="btn" id="saveStatsBtn">Save</button>
@@ -1154,17 +1156,24 @@ document.getElementById('closeStatsBtn').addEventListener('click',()=> statsModa
 statsModal.addEventListener('click',e=>{ if(e.target===statsModal) statsModal.classList.remove('open'); });
 document.getElementById('addStatBtn').addEventListener('click',()=>{
   const input=document.getElementById('newStatLabel');
+  const vInput=document.getElementById('newStatValue');
   const label=input.value.trim();
   if(!label){ toast('Label required'); return; }
   const key=slugKey(label);
   if(STAT_KEYS.includes(key)){ toast('Stat exists'); return; }
   if(STAT_KEYS.length>=12){ toast('Max 12 stats'); return; }
+  let val=parseFloat(vInput ? vInput.value : '5');
+  if(isNaN(val)) val=5;
+  val=Math.min(10, Math.max(1, val));
+  // keep one decimal like stat polygon does
+  val=Math.round(val*10)/10;
   STAT_KEYS.push(key); STAT_LABELS.push(label);
   if(!STATS) STATS={};
-  STATS[key]=5;
+  STATS[key]=val;
   input.value='';
+  if(vInput) vInput.value='5';
   renderStatsManager();
-  toast('Stat added');
+  toast('Stat added — '+val);
 });
 document.getElementById('saveStatsBtn').addEventListener('click',()=>{
   for(let i=0;i<STAT_LABELS.length;i++){ if(!STAT_LABELS[i].trim()){ toast('Label empty'); return; } STAT_LABELS[i]=STAT_LABELS[i].trim(); }
