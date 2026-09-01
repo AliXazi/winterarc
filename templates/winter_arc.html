@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- WINTER ARC v1.3.1 — instant refreshUI polish 2026-09-01 -->
+<!-- WINTER ARC v1.3.2 — single stat label (key auto) 2026-09-01 -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -372,7 +372,7 @@
   .stats-row{display:flex;gap:8px;align-items:center;padding:8px;border:1px solid var(--hairline)}
   .stats-row input{flex:1;background:transparent;border:none;border-bottom:1px solid var(--hairline-strong);color:var(--text);font-family:"JetBrains Mono", monospace;font-size:11px;letter-spacing:1px;padding:6px 0;outline:none}
   .stats-row input:focus{border-color:var(--text)}
-  .stats-row .key{max-width:140px;text-transform:lowercase}
+  .stats-row .stat-key-hint{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;border:1px solid var(--hairline);padding:6px 8px;background:transparent;font-family:"JetBrains Mono", monospace;font-size:10px;letter-spacing:1px;text-transform:lowercase;color:var(--muted-soft)}
   @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
 </head>
@@ -993,27 +993,38 @@ function renderStatsManager(){
   STAT_KEYS.forEach((k,i)=>{
     const row=document.createElement('div'); row.className='stats-row';
     row.innerHTML=`
-      <input class="key" value="${escapeHtml(k)}" placeholder="key" title="key (lowercase)">
-      <input class="label" value="${escapeHtml(STAT_LABELS[i])}" placeholder="Label">
+      <input class="label" value="${escapeHtml(STAT_LABELS[i])}" placeholder="Label e.g. Hydration" title="Edit label — key auto-derived">
+      <span class="stat-key-hint" title="Internal key (auto)">${escapeHtml(k)}</span>
       <button class="btn small" data-act="del">Remove</button>
     `;
-    const keyIn=row.querySelector('.key');
     const labelIn=row.querySelector('.label');
+    const hint=row.querySelector('.stat-key-hint');
     labelIn.addEventListener('input',()=>{
-      STAT_LABELS[i]=labelIn.value.trim()||STAT_LABELS[i];
-      const slug=slugKey(labelIn.value);
-      // don't auto-change key if user edited it manually
-    });
-    keyIn.addEventListener('change',()=>{
-      const newKey=slugKey(keyIn.value);
+      const newLabel=labelIn.value.trim();
+      if(!newLabel){ hint.textContent=k; return; }
+      const newKey=slugKey(newLabel);
       const oldKey=STAT_KEYS[i];
-      if(!newKey || newKey===oldKey) { keyIn.value=oldKey; return; }
-      if(STAT_KEYS.includes(newKey)){ toast('Key exists'); keyIn.value=oldKey; return; }
+      // keep label live
+      STAT_LABELS[i]=newLabel;
+      if(!newKey || newKey===oldKey){ hint.textContent=oldKey; return; }
+      if(STAT_KEYS.includes(newKey)){ toast('Stat exists'); hint.textContent=oldKey+' → '+newKey+' (exists)'; return; }
       STAT_KEYS[i]=newKey;
       if(STATS && oldKey in STATS){ STATS[newKey]=STATS[oldKey]; delete STATS[oldKey]; }
-      // reassign tasks
       DATA.forEach(cat=>cat.tasks.forEach(t=>{ if(t.stat===oldKey) t.stat=newKey; }));
-      keyIn.value=newKey;
+      hint.textContent=newKey;
+    });
+    labelIn.addEventListener('change',()=>{
+      const finalLabel=labelIn.value.trim()||STAT_LABELS[i];
+      STAT_LABELS[i]=finalLabel;
+      labelIn.value=finalLabel;
+      const finalKey=slugKey(finalLabel);
+      if(finalKey && finalKey!==STAT_KEYS[i] && !STAT_KEYS.includes(finalKey)){
+        const oldKey=STAT_KEYS[i];
+        STAT_KEYS[i]=finalKey;
+        if(STATS && oldKey in STATS){ STATS[finalKey]=STATS[oldKey]; delete STATS[oldKey]; }
+        DATA.forEach(cat=>cat.tasks.forEach(t=>{ if(t.stat===oldKey) t.stat=finalKey; }));
+      }
+      hint.textContent=STAT_KEYS[i];
     });
     row.querySelector('[data-act="del"]').addEventListener('click',()=>{
       if(STAT_KEYS.length<=3){ toast('Keep at least 3 stats'); return; }
