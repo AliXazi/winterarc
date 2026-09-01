@@ -153,35 +153,9 @@
   .progress-meta b{color:var(--text);font-weight:400}
   .bar{height:1px;background:var(--hairline);overflow:hidden;position:relative}
   .fill{height:100%;width:0%;background:var(--text);transition:width .32s ease-out;will-change:width}
-  .mobile-progress-strip{display:none}
-  .mobile-progress-strip .mobile-progress-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-family:"JetBrains Mono", monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
-  .mobile-progress-strip .mobile-progress-meta b{color:var(--text);font-weight:400}
-  @media (max-width:768px){
-    .mobile-progress-strip{display:block;position:sticky;top:72px;z-index:18;background:#000;border-bottom:1px solid var(--hairline);padding:10px 0 12px}
-    .mobile-progress-strip .bar{height:2px}
-  }
-  @media (max-width:380px){
-    .mobile-progress-strip{top:68px}
-  }
-  /* sticky-stack wraps header + mobile strip + hero so all stay visible on scroll */
-  .sticky-stack{
-    position:sticky;
-    top:0;
-    z-index:20;
-    background:var(--canvas);
-    border-bottom:1px solid var(--hairline);
-  }
-  .sticky-stack header{
-    position:static;
-    border-bottom:none;
-  }
-  .sticky-stack .mobile-progress-strip{
-    position:static;
-    border-bottom:1px solid var(--hairline);
-  }
-  .sticky-stack .hero-band{
-    border-bottom:none;
-  }
+  /* topbar progress removed — topbar restored to original header only */
+  .mobile-progress-strip{display:none !important}
+  .bottom-progress-wrap{max-width:640px;margin:40px auto 0;padding:0 16px;text-align:center}
   .hero-band{
     background:var(--canvas);
     padding:96px 0 64px;
@@ -396,7 +370,6 @@
 </style>
 </head>
 <body>
-<div class="sticky-stack">
 <header>
   <div class="wrap">
     <div class="header-inner">
@@ -424,12 +397,6 @@
     </div>
   </div>
 </header>
-<div class="mobile-progress-strip" id="mobileProgressStrip" aria-label="Progress">
-  <div class="wrap">
-    <div class="mobile-progress-meta"><span>Daily protocol</span><b id="mobileProgressText">0% complete</b></div>
-    <div class="bar"><div class="fill" id="mobileFill"></div></div>
-  </div>
-</div>
 <div class="hero-band">
   <div class="wrap">
     <h2>WINTER ARC PROTOCOL</h2>
@@ -440,7 +407,6 @@
     </div>
     <div id="arcMeta" style="margin-top:16px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">DAY 1 OF 90 — 89 REMAINING • 90-DAY ARC</div>
   </div>
-</div>
 </div>
 <main class="wrap">
   <div class="top-grid">
@@ -470,6 +436,10 @@
   <div class="grid" id="grid"></div>
   <div style="display:flex;justify-content:center;margin-top:24px">
     <button class="btn small" id="addCardBtn">+ Add Card</button>
+  </div>
+  <div class="bottom-progress-wrap">
+    <div class="progress-meta"><span>Daily protocol</span><b id="bottomProgressText">0% complete</b></div>
+    <div class="bar"><div class="fill" id="bottomFill"></div></div>
   </div>
   <div class="hint" id="hint">Tip: Sign in with Google to save to cloud. Click ✎ to edit, double-click card title or task title to rename, “+ Add task” for habits, “+ Add Card” for new categories. Use Edit Stats to customize polygon.</div>
 </main>
@@ -974,6 +944,11 @@ function render(){
   document.getElementById('pctLabel').textContent=pct+'%';
   document.getElementById('progressText').textContent=pct+'% complete';
   document.getElementById('fill').style.width=pct+'%';
+  // bottom centred progress (mirrors hero)
+  const _bFill=document.getElementById('bottomFill');
+  const _bText=document.getElementById('bottomProgressText');
+  if(_bFill) _bFill.style.width=pct+'%';
+  if(_bText) _bText.textContent=pct+'% complete';
   const _mFill=document.getElementById('mobileFill');
   const _mText=document.getElementById('mobileProgressText');
   if(_mFill) _mFill.style.width=pct+'%';
@@ -1069,6 +1044,10 @@ function updateProgress(){
   document.getElementById('pctLabel').textContent=pct+'%';
   document.getElementById('progressText').textContent=pct+'% complete';
   document.getElementById('fill').style.width=pct+'%';
+  const bFill=document.getElementById('bottomFill');
+  const bText=document.getElementById('bottomProgressText');
+  if(bFill) bFill.style.width=pct+'%';
+  if(bText) bText.textContent=pct+'% complete';
   const mFill=document.getElementById('mobileFill');
   const mText=document.getElementById('mobileProgressText');
   if(mFill) mFill.style.width=pct+'%';
