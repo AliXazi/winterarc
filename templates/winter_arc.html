@@ -461,6 +461,8 @@
       <a href="/privacy">Privacy</a>
       <span>·</span>
       <a href="/faq">FAQ</a>
+      <span>·</span>
+      <a href="#" id="supportLink" title="Support Winter Arc via UPI">Support</a>
     </nav>
     <span id="footerMode">90-DAY ARC</span>
   </div>
@@ -541,6 +543,21 @@
     <div class="modal-actions">
       <button class="btn" id="cancelAdd">Cancel</button>
       <button class="btn" id="confirmAdd">Add task</button>
+    </div>
+  </div>
+</div>
+<div class="modal" id="supportModal">
+  <div class="modal-card" style="text-align:center">
+    <h3>Support Winter Arc</h3>
+    <p>Subtle, voluntary — scan or tap to support via UPI. No data leaves your device until you pay.</p>
+    <div style="display:flex;justify-content:center;margin:16px 0"><img id="supportQR" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi%3A%2F%2Fpay%3Fpa%3Dwinterarconline%40axl%26pn%3DWinter%2520Arc%26cu%3DINR" alt="UPI QR winterarconline@axl" width="220" height="220" style="border:1px solid var(--hairline);padding:8px;background:#fff"/></div>
+    <div style="font-family:JetBrains Mono,monospace;font-size:12px;letter-spacing:1px;color:var(--text);margin:8px 0;word-break:break-all">winterarconline@axl</div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px">
+      <a class="btn small" href="upi://pay?pa=winterarconline@axl&pn=Winter%20Arc&cu=INR">Open UPI App</a>
+      <button class="btn small" id="copyUPIBtn">Copy UPI</button>
+    </div>
+    <div class="modal-actions" style="justify-content:center">
+      <button class="btn" id="closeSupportBtn">Close</button>
     </div>
   </div>
 </div>
@@ -1156,6 +1173,15 @@ function renderStatsManager(){
 document.getElementById('manageStatsBtn').addEventListener('click',()=>{ renderStatsManager(); statsModal.classList.add('open'); });
 document.getElementById('closeStatsBtn').addEventListener('click',()=> statsModal.classList.remove('open'));
 statsModal.addEventListener('click',e=>{ if(e.target===statsModal) statsModal.classList.remove('open'); });
+// Support modal — subtle UPI donate
+const supportModal=document.getElementById('supportModal');
+document.getElementById('supportLink')?.addEventListener('click',e=>{ e.preventDefault(); supportModal?.classList.add('open'); });
+document.getElementById('closeSupportBtn')?.addEventListener('click',()=> supportModal?.classList.remove('open'));
+supportModal?.addEventListener('click',e=>{ if(e.target===supportModal) supportModal.classList.remove('open'); });
+document.getElementById('copyUPIBtn')?.addEventListener('click',async()=>{
+  try{ await navigator.clipboard.writeText('winterarconline@axl'); toast('UPI copied — winterarconline@axl'); }
+  catch{ prompt('Copy UPI:', 'winterarconline@axl'); }
+});
 document.getElementById('addStatBtn').addEventListener('click',()=>{
   const input=document.getElementById('newStatLabel');
   const vInput=document.getElementById('newStatValue');
