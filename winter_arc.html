@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- WINTER ARC v1.3.1 — instant refreshUI polish 2026-09-01 -->
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -770,14 +771,20 @@ function initChart(){
   });
   updateChartImmediate();
 }
+function refreshUI(){
+  try{ updateChartImmediate(); }catch{}
+  try{ updateProgress(); }catch{}
+  try{ syncMobMeta(); }catch{}
+}
 function updateChartImmediate(){
   if(!chart){
-    // chart not ready (modal hidden) — retry next frame
     requestAnimationFrame(updateChartImmediate);
     return;
   }
-  chart.data.labels=[...STAT_LABELS];
-  chart.data.datasets[0].data=STAT_KEYS.map(k=>STATS && STATS[k]!=null ? STATS[k] : 5);
+  try{
+    chart.data.labels=[...STAT_LABELS];
+    chart.data.datasets[0].data=STAT_KEYS.map(k=>STATS && STATS[k]!=null ? STATS[k] : 5);
+  }catch(e){ console.error('chart update failed',e); }
   chart.update('none');
   const badge=document.getElementById('levelBadge');
   if(badge) badge.textContent='LVL '+Math.floor(avgLevel())+' • '+avgLevel()+' avg';
@@ -881,15 +888,13 @@ function render(){
         CHECKS[t.id]=cb.checked;
         const key=t.stat||STAT_KEYS[0];
         if(STATS && STAT_KEYS.includes(key)){
-          if(cb.checked && !wasDone){
-            STATS[key]=Math.min(10, +(STATS[key]+0.18).toFixed(2));
-          } else if(!cb.checked && wasDone){
-            STATS[key]=Math.max(1, +(STATS[key]-0.18).toFixed(2));
-          }
-          updateChart();
+          if(cb.checked && !wasDone) STATS[key]=Math.min(10, +(STATS[key]+0.18).toFixed(2));
+          else if(!cb.checked && wasDone) STATS[key]=Math.max(1, +(STATS[key]-0.18).toFixed(2));
         }
-        saveAll(); row.classList.toggle('done',cb.checked); updateProgress();
+        row.classList.toggle('done',cb.checked);
+        refreshUI();
         checkStreakOnProgress();
+        saveAll();
         if(navigator.vibrate) navigator.vibrate(10);
       });
       function startEdit(){ desc.contentEditable='true'; desc.focus(); const r=document.createRange(); r.selectNodeContents(desc); r.collapse(false); const s=window.getSelection(); s.removeAllRanges(); s.addRange(r); editBtn.textContent='✓'; }
@@ -906,12 +911,12 @@ function render(){
         const input=document.createElement('input'); input.value=t.title;
         input.style.cssText='font:400 15px Saira Condensed,sans-serif;background:transparent;border:none;border-bottom:1px solid #fff;color:white;padding:4px 0;width:100%;letter-spacing:1px;text-transform:uppercase';
         titleEl.replaceWith(input); input.focus(); input.select();
-        const save=()=>{ const v=input.value.trim()||t.title; if(v!==t.title){ t.title=v; saveAll(); render(); updateChartImmediate(); updateProgress(); try{ syncMobMeta(); }catch{} toast('Renamed'); } else render(); };
+        const save=()=>{ const v=input.value.trim()||t.title; if(v!==t.title){ t.title=v; render(); refreshUI(); saveAll(); toast('Renamed'); } else render(); };
         input.addEventListener('blur',save); input.addEventListener('keydown',e=>{ if(e.key==='Enter') save(); if(e.key==='Escape') render(); });
       }); titleEl.title='Double-click to edit title';
       delBtn.addEventListener('click',()=>{
         if(!confirm(`Delete "${t.title}"?`)) return;
-        cat.tasks=cat.tasks.filter(x=>x.id!==t.id); delete CHECKS[t.id]; saveAll(); render(); updateChartImmediate(); updateProgress(); try{ syncMobMeta(); }catch{} toast('Task removed');
+        cat.tasks=cat.tasks.filter(x=>x.id!==t.id); delete CHECKS[t.id]; render(); refreshUI(); saveAll(); toast('Task removed');
       });
       tasksEl.appendChild(row);
     });
@@ -922,7 +927,7 @@ function render(){
       const input=document.createElement('input'); input.value=cat.cat;
       input.style.cssText='font:400 16px Saira Condensed,sans-serif;background:transparent;border:none;border-bottom:1px solid #fff;color:white;padding:2px 0;letter-spacing:1.5px;text-transform:uppercase;width:180px';
       catLabel.replaceWith(input); input.focus(); input.select();
-      const save=()=>{ const v=input.value.trim()||cat.cat; cat.cat=v; saveAll(); render(); updateProgress(); try{ syncMobMeta(); }catch{} toast('Card renamed'); };
+      const save=()=>{ const v=input.value.trim()||cat.cat; cat.cat=v; render(); refreshUI(); saveAll(); toast('Card renamed'); };
       input.addEventListener('blur',save); input.addEventListener('keydown',e=>{ if(e.key==='Enter') save(); if(e.key==='Escape') render(); });
     });
     card.querySelector('[data-card-del]').addEventListener('click',()=>{
@@ -930,7 +935,7 @@ function render(){
       if(!confirm(`Delete card "${cat.cat}" and its ${cat.tasks.length} tasks?`)) return;
       DATA=DATA.filter(c=>c.id!==cat.id);
       cat.tasks.forEach(t=>delete CHECKS[t.id]);
-      saveAll(); render(); updateChartImmediate(); updateProgress(); try{ syncMobMeta(); }catch{} toast('Card removed');
+      render(); refreshUI(); saveAll(); toast('Card removed');
     });
     grid.appendChild(card);
   });
@@ -975,10 +980,8 @@ document.getElementById('onboardSave').addEventListener('click',()=>{
   try{ localStorage.setItem(LS_STATS, JSON.stringify(STATS)); }catch{}
   try{ localStorage.setItem(LS_STAT_DEFS, JSON.stringify(vals._defs)); }catch{}
   document.getElementById('onboardModal').classList.remove('open');
-  try{ updateChartImmediate(); }catch{}
   try{ render(); }catch{}
-  try{ updateProgress(); }catch{}
-  try{ syncMobMeta(); }catch{}
+  try{ refreshUI(); }catch{}
   saveAll();
   toast('Level 1 initialized');
 });
@@ -1051,10 +1054,8 @@ document.getElementById('saveStatsBtn').addEventListener('click',()=>{
   try{ localStorage.setItem(LS_STAT_DEFS, JSON.stringify(STATS._defs)); }catch{}
   try{ localStorage.setItem(LS_STATS, JSON.stringify(STATS)); }catch{}
   statsModal.classList.remove('open');
-  try{ updateChartImmediate(); }catch{}
   try{ render(); }catch{}
-  try{ updateProgress(); }catch{}
-  try{ syncMobMeta(); }catch{}
+  try{ refreshUI(); }catch{}
   saveAll();
   toast('Stats updated');
 });
@@ -1080,7 +1081,7 @@ document.getElementById('confirmAdd').addEventListener('click',()=>{
   if(!cat) return;
   const newTask={id:'c'+Date.now(), title, desc: desc||'Custom habit', stat};
   cat.tasks.push(newTask);
-  saveAll(); addModal.classList.remove('open'); render(); updateProgress(); try{ syncMobMeta(); }catch{} toast(AUTH.authenticated?'Task added — cloud':'Task added');
+  addModal.classList.remove('open'); render(); refreshUI(); saveAll(); toast(AUTH.authenticated?'Task added — cloud':'Task added');
 });
 // Add Card modal
 const cardModal=document.getElementById('cardModal');
@@ -1099,7 +1100,7 @@ document.getElementById('confirmCard').addEventListener('click',()=>{
   if(DATA.some(c=>c.cat.toLowerCase()===name.toLowerCase())){ toast('Card exists'); return; }
   const newCat={ id:'h'+Date.now(), cat:name, color:/^#([0-9a-fA-F]{3,8})$/.test(color)?color:'#ffffff', tasks:[] };
   DATA.push(newCat);
-  saveAll(); cardModal.classList.remove('open'); render(); updateProgress(); try{ syncMobMeta(); }catch{} toast('Card added');
+  cardModal.classList.remove('open'); render(); refreshUI(); saveAll(); toast('Card added');
 });
 document.getElementById('resetBtn').addEventListener('click',async()=>{
   if(!confirm('Reset all checks, custom tasks, and Level 1 stats?')) return;
