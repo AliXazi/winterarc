@@ -1,9 +1,9 @@
 # Build Log: WINTERARC
 
-> Status: Phase 5 — Verification Complete, Phase 6 — Handoff (2026-09-01 — arc duration selector added)
+> Status: Phase 5 — Verification Complete, Phase 6 — Handoff (2026-09-01 — arc duration selector + winterarc.online live)
 > Last updated: 2026-09-01
 
-> **2026-09-01 Fix Pack v2:** Google-only, hero sticky, 90-day arc, **arc duration selector before Level 1 quiz** — 90 standard vs custom 7–365 days (affects DAY X OF Y + arc progress everywhere, persisted via `arc_days` + LS_ARC_DAYS). Verified custom 30→45 + 14/14 baseline still pass.
+> **Live:** https://winterarc.online (custom domain, Render fallback https://winterarc-a1ua.onrender.com) — both serve `winter_arc.html` with #arcDurationModal. **Fix Pack v2** Google-only, hero sticky, 90-day arc, arc selector 90 vs custom 7–365 (affects DAY X OF Y, persisted via `arc_days` + LS_ARC_DAYS). Verified custom 30→45 + 14/14.
 
 ## 1. Project Description
 WINTERARC is a Habits/Goals tracking SaaS for the general public. Users sign up (email/password + social login) and manage personal habits/goals through a minimal, clean dashboard. Core v1 is single-user CRUD for habits/goals (create habit, log progress, track streaks) with a polished responsive web UI. No mobile app, no email verification/password-reset in v1 (deferred to v1.1). Python/FastAPI stack, deploy-ready in 1-2 weeks with custom domain.
@@ -14,7 +14,7 @@ WINTERARC is a Habits/Goals tracking SaaS for the general public. Users sign up 
 - **Q:** What are the absolute must-have features for v1? **A:** Auth + accounts *(decision: auth is P0)*
 - **Q:** Do you have a design direction? **A:** Minimal & Clean *(decision: white space, simple typography, Tailwind-like minimalism — realized as WINTER ARC PROTOCOL: austere black canvas, Bugatti-inspired typography, Chart.js radar, glassmorphism off)*
 - **Q:** Any tech stack preference or constraints? **A:** Python / Django-FastAPI *(decision: FastAPI backend, Python ecosystem)*
-- **Q:** What's your timeline and hosting/deploy preference? **A:** 1-2 weeks - polished *(decision: proper setup, custom domain, production-ready deploy)*
+- **Q:** What's your timeline and hosting/deploy preference? **A:** 1-2 weeks - polished *(decision: proper setup, custom domain `winterarc.online` → Render `winterarc-a1ua.onrender.com` fallback, production-ready deploy — live 2026-09-01 verified)*
 - **Q:** What does your SaaS actually do? **A:** Productivity tool *(decision: habits/goals focus — implemented as 90-day WINTER ARC: Daily protocol checks, 8 stat polygon, streaks, custom cards/tasks, cloud sync)*
 - **Q:** What auth & account features for v1? **A:** + Social login *(decision: Google-only OAuth, SessionMiddleware cookie, 30-day session, dev-login hidden — see 2026-09-01 fix)*
 - **Q:** Beyond auth, what are the 2-3 core features users will use? **A:** Dashboard + CRUD *(decision: single-page Winter Arc dashboard: cards/tasks CRUD, inline edit, stat managers, progress + arc countdown)*

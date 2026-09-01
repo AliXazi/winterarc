@@ -6,7 +6,8 @@
 3. Credentials → Create OAuth client → **Web application**
 4. Add **Authorized redirect URIs**:
    - `http://127.0.0.1:8000/auth/google/callback` (local)
-   - `https://YOUR-APP.onrender.com/auth/google/callback` (prod — replace after deploy)
+   - `https://winterarc.online/auth/google/callback` (prod — custom domain)
+   - `https://winterarc-a1ua.onrender.com/auth/google/callback` (Render fallback)
 5. Copy Client ID + Secret → keep for step 3.
 
 ## 2) Push to GitHub
@@ -26,8 +27,8 @@ gh repo create winterarc --public --source=. --push
   - `GOOGLE_CLIENT_ID` = from step 1
   - `GOOGLE_CLIENT_SECRET` = from step 1
   - `SESSION_SECRET` = `openssl rand -hex 32` or generate
-- Deploy → wait 2-3 min → open `https://winterarc-xxxx.onrender.com/arc`
-- Back in Google Console, add the **real prod redirect** (`https://winterarc-xxxx.onrender.com/auth/google/callback`) → Save.
+- Deploy → wait 2-3 min → open `https://winterarc.online/arc` (or `https://winterarc-a1ua.onrender.com/arc` fallback)
+- Back in Google Console, add the **real prod redirects** (`https://winterarc.online/auth/google/callback` + `https://winterarc-a1ua.onrender.com/auth/google/callback`) → Save.
 
 ### Alternative hosts
 **Fly.io:**

@@ -2,7 +2,7 @@
 
 Austere discipline tracker — **configurable arc: 90 days standard vs custom 7–365**. Single-page FastAPI + plain JS. Black canvas, Bugatti-inspired typography (Saira Condensed / Cormorant Garamond / JetBrains Mono), pill ghost buttons, sticky header + sticky hero-band always visible, Chart.js stat polygon, DAY X OF Y countdown.
 
-> Live entry: `/` or `/arc` → `winter_arc.html`. Health: `/health` → `{"status":"ok","mode":"winter-arc-cloud"}`.
+> Live: **https://winterarc.online** (custom domain, Render `winterarc-a1ua.onrender.com` fallback). Entry `/` or `/arc` → `winter_arc.html`. Health `/health` → `{"status":"ok","mode":"winter-arc-cloud"}`.
 
 ## Quick start
 
@@ -11,7 +11,9 @@ Austere discipline tracker — **configurable arc: 90 days standard vs custom 7�
 copy .env.example .env
 # edit .env → set GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / SESSION_SECRET
 # get creds: https://console.cloud.google.com/apis/credentials
-#   Web app → redirect: http://127.0.0.1:8000/auth/google/callback
+#   Web app → redirects: http://127.0.0.1:8000/auth/google/callback
+#                          https://winterarc.online/auth/google/callback
+#                          https://winterarc-a1ua.onrender.com/auth/google/callback
 
 # 2) run
 uv sync
@@ -42,7 +44,7 @@ See `DEPLOY.md` + `render.yaml` + `Dockerfile`.
 
 1. Push to GitHub → Render Dashboard → New → Blueprint → pick repo → `render.yaml` auto-applies (web + free Postgres).
 2. Env vars in Render: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `SESSION_SECRET` (Generate Value).
-3. After deploy, add real redirect in Google Console: `https://YOUR-APP.onrender.com/auth/google/callback`.
+3. After deploy, add real redirects in Google Console: `https://winterarc.online/auth/google/callback` + `https://winterarc-a1ua.onrender.com/auth/google/callback`. Custom domain `winterarc.online` already attached → verify `https://winterarc.online/health`.
 4. Verify `/health` and Google sign-in → check task → refresh → same on another device.
 
 Fly.io / Railway analogues in `DEPLOY.md`.
