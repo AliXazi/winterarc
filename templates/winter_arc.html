@@ -155,7 +155,10 @@
   .fill{height:100%;width:0%;background:var(--text);transition:width .32s ease-out;will-change:width}
   /* topbar progress removed — topbar restored to original header only */
   .mobile-progress-strip{display:none !important}
-  .bottom-progress-wrap{max-width:640px;margin:40px auto 0;padding:0 16px;text-align:center}
+  #storagePill{display:none !important}
+  .bottom-progress-wrap{max-width:640px;margin:64px auto 0;padding:0 16px;text-align:center}
+  .bottom-progress-wrap .progress-meta{justify-content:center;gap:16px}
+  .bottom-progress-wrap .bar{height:2px}
   .hero-band{
     background:var(--canvas);
     padding:96px 0 64px;
@@ -277,11 +280,15 @@
   }
   .add-btn:hover{background:var(--text);color:#000}
   .hint{
-    margin-top:32px;padding:16px;
+    margin-top:40px;padding:24px;
     border:1px solid var(--hairline);background:transparent;
-    color:var(--body);font-family:"Cormorant Garamond", serif;font-size:14px;line-height:1.5;
+    color:var(--body);font-family:"Cormorant Garamond", serif;font-size:14px;line-height:1.7;
   }
-  footer{padding:48px 0 64px;border-top:1px solid var(--hairline);margin-top:40px}
+  footer{padding:64px 0 80px;border-top:1px solid var(--hairline);margin-top:64px}
+  /* make bottom area roomier — extra breathing between tip and footer */
+  main.wrap{padding-bottom:40px}
+  footer .footer-row{gap:24px}
+  footer .footer-bottom{margin-top:24px;padding-top:24px}
   .footer-row{
     display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap;
     color:var(--muted);font-family:"JetBrains Mono", monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;
@@ -453,7 +460,7 @@
       <span>·</span>
       <a href="/faq">FAQ</a>
     </nav>
-    <span id="footerMode">Cloud-synced when signed in</span>
+    <span id="footerMode">90-DAY ARC</span>
   </div>
   <div class="footer-bottom">
     <span>Minimal. Austere. Execution over aesthetics.</span>
@@ -1276,12 +1283,11 @@ async function init(){
     }
   } else {
     googleBtn.style.display='flex';
-    storagePill.textContent='Local';
     const local=loadLocal();
     DATA=local.data; CHECKS=local.checks; STATS=local.stats; STREAK=local.streak; LAST_100=local.last; ARC_START=local.arcStart || localStorage.getItem(LS_ARC_START) || null;
     let localArcDays = local.arcDays || parseInt(localStorage.getItem(LS_ARC_DAYS)||'0',10) || (STATS && (STATS._arc_days||STATS._arcDays)) || 0;
     if(localArcDays){ try{ ARC_DAYS=Math.min(365,Math.max(7,parseInt(localArcDays,10)||90)); }catch{ ARC_DAYS=DEFAULT_ARC_DAYS; } } else { ARC_DAYS=DEFAULT_ARC_DAYS; }
-    document.getElementById('footerMode').textContent='Local — sign in for cloud • '+ARC_DAYS+'-day arc';
+    document.getElementById('footerMode').textContent=ARC_DAYS+'-DAY ARC';
     if(!ARC_START){ ARC_START=todayStr(); try{ localStorage.setItem(LS_ARC_START, ARC_START); }catch{} }
     if(STATS && STATS._defs) loadStatDefs();
     else loadStatDefs();
@@ -1298,7 +1304,7 @@ async function init(){
     // show arc duration choice BEFORE the Level 1 quiz — affects DAY X OF Y display & other options
     showArcDurationModal(()=>{
       // after arc choice, refresh footer/arc UI and then show Level 1 quiz
-      document.getElementById('footerMode').textContent = AUTH.authenticated ? 'Cloud-synced • '+AUTH.email+' • '+ARC_DAYS+'-day arc' : 'Local — sign in for cloud • '+ARC_DAYS+'-day arc';
+      document.getElementById('footerMode').textContent = AUTH.authenticated ? 'Cloud-synced • '+AUTH.email+' • '+ARC_DAYS+'-day arc' : ARC_DAYS+'-DAY ARC';
       updateArcUI();
       if(STATS) { STATS._arc_days=ARC_DAYS; STATS._arc_start=ARC_START; }
       try{ localStorage.setItem(LS_ARC_DAYS, String(ARC_DAYS)); }catch{}
