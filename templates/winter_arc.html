@@ -163,21 +163,30 @@
   @media (max-width:380px){
     .mobile-progress-strip{top:68px}
   }
+  /* sticky-stack wraps header + mobile strip + hero so all stay visible on scroll */
+  .sticky-stack{
+    position:sticky;
+    top:0;
+    z-index:20;
+    background:var(--canvas);
+    border-bottom:1px solid var(--hairline);
+  }
+  .sticky-stack header{
+    position:static;
+    border-bottom:none;
+  }
+  .sticky-stack .mobile-progress-strip{
+    position:static;
+    border-bottom:1px solid var(--hairline);
+  }
+  .sticky-stack .hero-band{
+    border-bottom:none;
+  }
   .hero-band{
     background:var(--canvas);
     padding:96px 0 64px;
     border-bottom:1px solid var(--hairline);
     text-align:center;
-    position:sticky;
-    top:56px;
-    z-index:18;
-  }
-  /* hero always visible on top — below header */
-  @media (max-width:768px){
-    .hero-band{position:sticky;top:72px;z-index:18}
-  }
-  @media (max-width:380px){
-    .hero-band{top:68px}
   }
   .hero-band h2{
     margin:0;
@@ -387,6 +396,7 @@
 </style>
 </head>
 <body>
+<div class="sticky-stack">
 <header>
   <div class="wrap">
     <div class="header-inner">
@@ -430,6 +440,7 @@
     </div>
     <div id="arcMeta" style="margin-top:16px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">DAY 1 OF 90 — 89 REMAINING • 90-DAY ARC</div>
   </div>
+</div>
 </div>
 <main class="wrap">
   <div class="top-grid">
