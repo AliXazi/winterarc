@@ -168,6 +168,16 @@
     padding:96px 0 64px;
     border-bottom:1px solid var(--hairline);
     text-align:center;
+    position:sticky;
+    top:56px;
+    z-index:18;
+  }
+  /* hero always visible on top — below header */
+  @media (max-width:768px){
+    .hero-band{position:sticky;top:72px;z-index:18}
+  }
+  @media (max-width:380px){
+    .hero-band{top:68px}
   }
   .hero-band h2{
     margin:0;
@@ -418,6 +428,7 @@
       <div class="progress-meta"><span>Daily protocol</span><b id="progressText">0% complete</b></div>
       <div class="bar"><div class="fill" id="fill"></div></div>
     </div>
+    <div id="arcMeta" style="margin-top:16px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">DAY 1 OF 90 — 89 REMAINING • 90-DAY ARC</div>
   </div>
 </div>
 <main class="wrap">
@@ -468,6 +479,27 @@
     <span>Built for the Winter Arc — focus, discipline, execution.</span>
   </div>
 </footer>
+<div class="modal" id="arcDurationModal">
+  <div class="modal-card">
+    <h3>Choose Your Arc</h3>
+    <p>Standard is 90 days — the classic Winter Arc. Or set a custom countdown (7–365 days). This affects your DAY X OF Y display, streak target and arc progress bar.</p>
+    <div style="display:flex;flex-direction:column;gap:12px;margin:16px 0">
+      <label style="display:flex;align-items:center;gap:10px;padding:14px;border:1px solid var(--hairline);cursor:pointer">
+        <input type="radio" name="arcChoice" value="90" checked>
+        <span style="font-family:JetBrains Mono,monospace;font-size:12px;letter-spacing:1px"><b style="color:var(--text)">90 days — Standard Arc</b> (Recommended)</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;padding:14px;border:1px solid var(--hairline);cursor:pointer;flex-wrap:wrap">
+        <input type="radio" name="arcChoice" value="custom">
+        <span style="font-family:JetBrains Mono,monospace;font-size:12px;letter-spacing:1px">Custom —</span>
+        <input id="customArcDays" type="number" min="7" max="365" placeholder="e.g. 30" style="width:110px;padding:10px 0;background:transparent;border:none;border-bottom:1px solid var(--hairline-strong);color:var(--text);font-family:JetBrains Mono,monospace;outline:none">
+        <span style="font-family:JetBrains Mono,monospace;font-size:11px;color:var(--muted)">days (7–365)</span>
+      </label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="confirmArcDays">Continue →</button>
+    </div>
+  </div>
+</div>
 <div class="modal" id="onboardModal">
   <div class="modal-card">
     <h3>Initialize Protocol — Level 1</h3>
@@ -541,8 +573,10 @@ const DEFAULTS=[
     { id:'t8', title:'Social Life', desc:'Meaningful social interaction — call, meet, or connect.', stat:'socialLife'},
   ]},
 ];
-const LS_TASKS='winterarc-tasks-v2', LS_CHECKS='winterarc-checks-v2', LS_STATS='winterarc-stats-v2', LS_STREAK='winterarc-streak', LS_LAST='winterarc-last100', LS_STAT_DEFS='winterarc-stat-defs-v1';
-let DATA=[], CHECKS={}, STATS=null, STREAK=0, LAST_100=null, AUTH={authenticated:false};
+let ARC_DAYS=90;
+const DEFAULT_ARC_DAYS=90;
+const LS_TASKS='winterarc-tasks-v2', LS_CHECKS='winterarc-checks-v2', LS_STATS='winterarc-stats-v2', LS_STREAK='winterarc-streak', LS_LAST='winterarc-last100', LS_STAT_DEFS='winterarc-stat-defs-v1', LS_ARC_START='winterarc-arc-start-v1', LS_ARC_DAYS='winterarc-arc-days-v1';
+let DATA=[], CHECKS={}, STATS=null, STREAK=0, LAST_100=null, ARC_START=null, AUTH={authenticated:false};
 let chart=null, saveTimer=null;
 
 // --- mobile dropdown (mobile-only) ---
@@ -594,8 +628,8 @@ async function doReload(){
   try{
     if(AUTH.authenticated){
       clearTimeout(saveTimer);
-      const payload={data:DATA,checks:CHECKS,stats:STATS,streak:STREAK,last_100_date:LAST_100};
-      if(STATS) payload.stats={...STATS, _defs:STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]}))};
+      const payload={data:DATA,checks:CHECKS,stats:STATS,streak:STREAK,last_100_date:LAST_100,arc_start_date:ARC_START,arc_days:ARC_DAYS};
+      if(STATS) payload.stats={...STATS, _defs:STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]})), _arc_days:ARC_DAYS, _arc_start:ARC_START};
       const ctrl=new AbortController();
       const t=setTimeout(()=>ctrl.abort(),4000);
       await fetch('/api/winterarc',{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload), signal:ctrl.signal});
@@ -607,6 +641,8 @@ async function doReload(){
         localStorage.setItem(LS_STATS, JSON.stringify(STATS));
         localStorage.setItem(LS_STREAK, String(STREAK));
         if(LAST_100) localStorage.setItem(LS_LAST, LAST_100); else localStorage.removeItem(LS_LAST);
+        if(ARC_START) localStorage.setItem(LS_ARC_START, ARC_START);
+        localStorage.setItem(LS_ARC_DAYS, String(ARC_DAYS));
         saveStatDefs();
       }catch(e){ console.error('local save failed',e); }
     }
@@ -618,6 +654,71 @@ async function doReload(){
 }
 function todayStr(){ return new Date().toISOString().slice(0,10); }
 function yesterdayStr(){ const d=new Date(); d.setDate(d.getDate()-1); return d.toISOString().slice(0,10); }
+function arcDayNumber(){
+  if(!ARC_START) return 1;
+  const diff=Math.floor((new Date(todayStr())-new Date(ARC_START))/(1000*60*60*24));
+  return Math.min(ARC_DAYS, Math.max(1, diff+1));
+}
+function arcRemaining(){ return Math.max(0, ARC_DAYS - arcDayNumber()); }
+function updateArcUI(){
+  const el=document.getElementById('arcMeta');
+  if(!el) return;
+  const day=arcDayNumber();
+  const rem=arcRemaining();
+  const label = ARC_DAYS===90 ? '90-DAY ARC' : `${ARC_DAYS}-DAY ARC`;
+  if(day>=ARC_DAYS) el.textContent=`DAY ${ARC_DAYS} OF ${ARC_DAYS} — ARC COMPLETE • ${label}`;
+  else el.textContent=`DAY ${day} OF ${ARC_DAYS} — ${rem} REMAINING • ${label}`;
+  // also update title suffix if needed
+}
+function ensureArcStart(){
+  if(!ARC_START){
+    ARC_START=todayStr();
+    saveAll();
+  }
+  updateArcUI();
+}
+function getSelectedArcDays(){
+  const sel=document.querySelector('input[name="arcChoice"]:checked');
+  if(!sel) return 90;
+  if(sel.value==='90') return 90;
+  const v=parseInt((document.getElementById('customArcDays')||{}).value,10);
+  if(!v || isNaN(v)) return 90;
+  return Math.min(365, Math.max(7, v));
+}
+function showArcDurationModal(onDone){
+  const modal=document.getElementById('arcDurationModal');
+  if(!modal) { onDone && onDone(); return; }
+  // prefill current
+  const customInput=document.getElementById('customArcDays');
+  const radios=modal.querySelectorAll('input[name="arcChoice"]');
+  if(ARC_DAYS===90){
+    radios.forEach(r=> r.checked = r.value==='90');
+    if(customInput) customInput.value='';
+  } else {
+    radios.forEach(r=> r.checked = r.value==='custom');
+    if(customInput) customInput.value=String(ARC_DAYS);
+  }
+  modal.classList.add('open');
+  // auto focus custom when clicking
+  if(customInput){
+    customInput.addEventListener('focus',()=>{ const c=modal.querySelector('input[value="custom"]'); if(c) c.checked=true; });
+  }
+  const btn=document.getElementById('confirmArcDays');
+  const handler=()=>{
+    const days=getSelectedArcDays();
+    ARC_DAYS=days;
+    try{ localStorage.setItem(LS_ARC_DAYS, String(ARC_DAYS)); }catch{}
+    if(STATS) { STATS._arc_days=ARC_DAYS; }
+    if(!ARC_START){ ARC_START=todayStr(); try{ localStorage.setItem(LS_ARC_START, ARC_START); }catch{} }
+    modal.classList.remove('open');
+    btn.removeEventListener('click', handler);
+    updateArcUI();
+    saveAll();
+    onDone && onDone();
+  };
+  btn.addEventListener('click', handler);
+  modal.addEventListener('click',function once(e){ if(e.target===modal){ modal.classList.remove('open'); } });
+}
 function avgLevel(){ const v=STAT_KEYS.map(k=>STATS[k]||5); return (v.reduce((a,b)=>a+b,0)/v.length).toFixed(1); }
 function slugKey(label){ return label.trim().toLowerCase().replace(/[^a-z0-9]+/g,'').replace(/^./,c=>c.toLowerCase()) || ('stat'+Date.now()); }
 
@@ -676,8 +777,10 @@ async function saveCloud(){
       // ensure _defs is in stats
       if(STATS){
         STATS._defs=STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]}));
+        STATS._arc_days=ARC_DAYS;
+        STATS._arc_start=ARC_START;
       }
-      const res=await fetch('/api/winterarc',{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:DATA,checks:CHECKS,stats:STATS,streak:STREAK,last_100_date:LAST_100})});
+      const res=await fetch('/api/winterarc',{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:DATA,checks:CHECKS,stats:STATS,streak:STREAK,last_100_date:LAST_100,arc_start_date:ARC_START,arc_days:ARC_DAYS})});
       if(res.ok){ document.getElementById('storagePill').textContent='Cloud synced'; }
     }catch{}
   },400);
@@ -689,7 +792,10 @@ function saveLocal(){
   localStorage.setItem(LS_STATS, JSON.stringify(STATS));
   localStorage.setItem(LS_STREAK, String(STREAK));
   if(LAST_100) localStorage.setItem(LS_LAST, LAST_100); else localStorage.removeItem(LS_LAST);
+  if(ARC_START) localStorage.setItem(LS_ARC_START, ARC_START);
+  localStorage.setItem(LS_ARC_DAYS, String(ARC_DAYS));
   saveStatDefs();
+  updateArcUI();
 }
 function saveAll(){
   if(AUTH.authenticated) saveCloud();
@@ -726,9 +832,13 @@ function loadLocal(){
     try{ stats=JSON.parse(localStorage.getItem(LS_STATS)||'null'); }catch{}
     let streak=parseInt(localStorage.getItem(LS_STREAK)||'0',10)||0;
     let last=localStorage.getItem(LS_LAST)||null;
+    let arcStart=localStorage.getItem(LS_ARC_START)||null;
+    let arcDays=parseInt(localStorage.getItem(LS_ARC_DAYS)||'0',10)||0;
+    if(arcDays<7 || arcDays>365) arcDays=0;
+    if(!arcDays && stats && stats._arc_days) { try{ arcDays=parseInt(stats._arc_days,10)||0; }catch{} }
     if(!stats) stats=null;
-    return {data,checks,stats,streak,last};
-  }catch{ return {data:clone(DEFAULTS),checks:{},stats:null,streak:0,last:null}; }
+    return {data,checks,stats,streak,last,arcStart,arcDays};
+  }catch{ return {data:clone(DEFAULTS),checks:{},stats:null,streak:0,last:null,arcStart:null,arcDays:0}; }
 }
 function initChart(){
   const canvas=document.getElementById('radar');
@@ -976,14 +1086,17 @@ document.getElementById('onboardSave').addEventListener('click',()=>{
   document.querySelectorAll('#onboardGrid input').forEach(inp=>{ vals[inp.dataset.key]=parseInt(inp.value,10); });
   STAT_KEYS.forEach(k=>{ if(!(k in vals)) vals[k]=5; });
   vals._defs=STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]}));
+  vals._arc_days=ARC_DAYS;
+  vals._arc_start=ARC_START;
   STATS=vals;
   try{ localStorage.setItem(LS_STATS, JSON.stringify(STATS)); }catch{}
   try{ localStorage.setItem(LS_STAT_DEFS, JSON.stringify(vals._defs)); }catch{}
+  try{ localStorage.setItem(LS_ARC_DAYS, String(ARC_DAYS)); }catch{}
   document.getElementById('onboardModal').classList.remove('open');
   try{ render(); }catch{}
-  try{ refreshUI(); }catch{}
+  try{ refreshUI(); updateArcUI(); }catch{}
   saveAll();
-  toast('Level 1 initialized');
+  toast('Level 1 initialized — '+ARC_DAYS+'-day arc');
 });
 // Stats manager
 const statsModal=document.getElementById('statsModal');
@@ -1114,23 +1227,26 @@ document.getElementById('confirmCard').addEventListener('click',()=>{
   cardModal.classList.remove('open'); render(); refreshUI(); saveAll(); toast('Card added');
 });
 document.getElementById('resetBtn').addEventListener('click',async()=>{
-  if(!confirm('Reset all checks, custom tasks, and Level 1 stats?')) return;
+  if(!confirm('Reset all checks, custom tasks, and Level 1 stats? (arc resets to Day 1)')) return;
   if(AUTH.authenticated){
-    DATA=clone(DEFAULTS); CHECKS={}; STATS=null; STREAK=0; LAST_100=null;
+    DATA=clone(DEFAULTS); CHECKS={}; STATS=null; STREAK=0; LAST_100=null; ARC_START=todayStr(); ARC_DAYS=DEFAULT_ARC_DAYS;
     localStorage.clear();
     // reset stat defs to default
     STAT_KEYS=["hydration","nutrition","training","recovery","deepWork","discipline","reading","socialLife"];
     STAT_LABELS=["Hydration","Nutrition","Training","Recovery","Deep Work","Discipline","Reading","Social Life"];
-    showOnboarding();
+    STATS=Object.fromEntries(STAT_KEYS.map(k=>[k,5])); STATS._defs=STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]})); STATS._arc_days=ARC_DAYS; STATS._arc_start=ARC_START;
+    showArcDurationModal(()=>{ showOnboarding(); });
     await saveCloud();
-    render();
+    render(); updateArcUI();
   } else {
     localStorage.clear();
-    DATA=clone(DEFAULTS); CHECKS={}; STATS=null; STREAK=0; LAST_100=null;
+    DATA=clone(DEFAULTS); CHECKS={}; STATS=null; STREAK=0; LAST_100=null; ARC_START=todayStr(); ARC_DAYS=DEFAULT_ARC_DAYS;
+    localStorage.setItem(LS_ARC_START, ARC_START); localStorage.setItem(LS_ARC_DAYS, String(ARC_DAYS));
     STAT_KEYS=["hydration","nutrition","training","recovery","deepWork","discipline","reading","socialLife"];
     STAT_LABELS=["Hydration","Nutrition","Training","Recovery","Deep Work","Discipline","Reading","Social Life"];
-    showOnboarding();
-    render();
+    STATS=Object.fromEntries(STAT_KEYS.map(k=>[k,5])); STATS._defs=STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]})); STATS._arc_days=ARC_DAYS; STATS._arc_start=ARC_START;
+    showArcDurationModal(()=>{ showOnboarding(); });
+    render(); updateArcUI();
   }
 });
 async function init(){
@@ -1153,7 +1269,11 @@ async function init(){
     authArea.appendChild(userPill); authArea.appendChild(logout);
     const cloud=await fetchCloud();
     if(cloud){
-      DATA=cloud.data||clone(DEFAULTS); CHECKS=cloud.checks||{}; STATS=cloud.stats||null; STREAK=cloud.streak||0; LAST_100=cloud.last_100_date||null;
+      DATA=cloud.data||clone(DEFAULTS); CHECKS=cloud.checks||{}; STATS=cloud.stats||null; STREAK=cloud.streak||0; LAST_100=cloud.last_100_date||null; ARC_START=cloud.arc_start_date || (STATS && STATS._arc_start) || null;
+      let cloudArcDays = cloud.arc_days || (STATS && (STATS._arc_days || STATS._arcDays)) || null;
+      if(cloudArcDays){ try{ ARC_DAYS=Math.min(365,Math.max(7,parseInt(cloudArcDays,10)||90)); }catch{ ARC_DAYS=DEFAULT_ARC_DAYS; } } else { ARC_DAYS=DEFAULT_ARC_DAYS; }
+      if(!ARC_START) ARC_START=todayStr();
+      document.getElementById('footerMode').textContent='Cloud-synced • '+AUTH.email+' • '+ARC_DAYS+'-day arc';
       DATA.forEach(cat=>cat.tasks.forEach(t=>{ if(t.stat==='activeRecall') t.stat='socialLife'; if(!t.stat) t.stat=STAT_KEYS[0]; }));
       if(STATS && STATS._defs){ loadStatDefs(); }
       else if(STATS){
@@ -1161,14 +1281,18 @@ async function init(){
         if('activeRecall' in STATS && !('socialLife' in STATS)){ STATS.socialLife=STATS.activeRecall; delete STATS.activeRecall; }
       }
     } else {
-      DATA=clone(DEFAULTS); CHECKS={}; STATS=null; STREAK=0; LAST_100=null;
+      DATA=clone(DEFAULTS); CHECKS={}; STATS=null; STREAK=0; LAST_100=null; ARC_START=todayStr(); ARC_DAYS=DEFAULT_ARC_DAYS;
+      document.getElementById('footerMode').textContent='Cloud-synced • '+AUTH.email+' • '+ARC_DAYS+'-day arc';
     }
   } else {
     googleBtn.style.display='flex';
     storagePill.textContent='Local';
-    document.getElementById('footerMode').textContent='Local — sign in for cloud';
     const local=loadLocal();
-    DATA=local.data; CHECKS=local.checks; STATS=local.stats; STREAK=local.streak; LAST_100=local.last;
+    DATA=local.data; CHECKS=local.checks; STATS=local.stats; STREAK=local.streak; LAST_100=local.last; ARC_START=local.arcStart || localStorage.getItem(LS_ARC_START) || null;
+    let localArcDays = local.arcDays || parseInt(localStorage.getItem(LS_ARC_DAYS)||'0',10) || (STATS && (STATS._arc_days||STATS._arcDays)) || 0;
+    if(localArcDays){ try{ ARC_DAYS=Math.min(365,Math.max(7,parseInt(localArcDays,10)||90)); }catch{ ARC_DAYS=DEFAULT_ARC_DAYS; } } else { ARC_DAYS=DEFAULT_ARC_DAYS; }
+    document.getElementById('footerMode').textContent='Local — sign in for cloud • '+ARC_DAYS+'-day arc';
+    if(!ARC_START){ ARC_START=todayStr(); try{ localStorage.setItem(LS_ARC_START, ARC_START); }catch{} }
     if(STATS && STATS._defs) loadStatDefs();
     else loadStatDefs();
   }
@@ -1177,23 +1301,43 @@ async function init(){
   DATA.forEach(cat=>cat.tasks.forEach(t=>{ if(t.stat==='activeRecall') t.stat='socialLife'; }));
 
   if(!STATS){
-    showOnboarding();
     STATS=Object.fromEntries(STAT_KEYS.map(k=>[k,5]));
     STATS._defs=STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]}));
+    STATS._arc_days=ARC_DAYS;
+    STATS._arc_start=ARC_START;
+    // show arc duration choice BEFORE the Level 1 quiz — affects DAY X OF Y display & other options
+    showArcDurationModal(()=>{
+      // after arc choice, refresh footer/arc UI and then show Level 1 quiz
+      document.getElementById('footerMode').textContent = AUTH.authenticated ? 'Cloud-synced • '+AUTH.email+' • '+ARC_DAYS+'-day arc' : 'Local — sign in for cloud • '+ARC_DAYS+'-day arc';
+      updateArcUI();
+      if(STATS) { STATS._arc_days=ARC_DAYS; STATS._arc_start=ARC_START; }
+      try{ localStorage.setItem(LS_ARC_DAYS, String(ARC_DAYS)); }catch{}
+      saveAll();
+      showOnboarding();
+    });
   }
   // ensure STATS has all keys and defs synced
   if(!STATS._defs) STATS._defs=STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]}));
   else loadStatDefs();
   STAT_KEYS.forEach(k=>{ if(!(k in STATS)) STATS[k]=5; });
+  // 90-day arc: ensure start persists
+  if(!ARC_START) ARC_START=todayStr();
+  // if cloud and no arc_start_date saved yet, persist now
+  if(AUTH.authenticated && !localStorage.getItem(LS_ARC_START)){
+    try{ localStorage.setItem(LS_ARC_START, ARC_START); }catch{}
+  }
   handleMissedStreakOnLoad();
   initChart();
   updateStreakUI(false);
   render();
+  updateArcUI();
   checkStreakOnProgress();
   try{ setupMobMenu(); syncMobMeta(); }catch{}
+  // persist arc start if newly created and authenticated
+  if(AUTH.authenticated) saveAll();
 }
 init();
-window.WINTERARC={get DATA(){return DATA}, get CHECKS(){return CHECKS}, get STATS(){return STATS}, get AUTH(){return AUTH}, get STAT_KEYS(){return STAT_KEYS}, get STAT_LABELS(){return STAT_LABELS}};
+window.WINTERARC={get DATA(){return DATA}, get CHECKS(){return CHECKS}, get STATS(){return STATS}, get AUTH(){return AUTH}, get STAT_KEYS(){return STAT_KEYS}, get STAT_LABELS(){return STAT_LABELS}, get ARC_START(){return ARC_START}, ARC_DAYS};
 </script>
 </body>
 </html>

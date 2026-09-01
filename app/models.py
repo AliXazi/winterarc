@@ -23,6 +23,8 @@ class WinterArcState(Base):
     stats_json: Mapped[str] = mapped_column(Text, default="{}") # 8 stats 1-10
     streak: Mapped[int] = mapped_column(Integer, default=0)
     last_100_date: Mapped[str | None] = mapped_column(String(20), nullable=True) # YYYY-MM-DD
+    arc_start_date: Mapped[str | None] = mapped_column(String(20), nullable=True) # YYYY-MM-DD, arc start
+    arc_days: Mapped[int] = mapped_column(Integer, default=90) # 90 standard or custom
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 
     user: Mapped["User"] = relationship(back_populates="state")

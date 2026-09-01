@@ -1,7 +1,9 @@
 # Build Log: WINTERARC
 
-> Status: Phase 4 — Complete, Phase 5 — Verification (next)
-> Last updated: 2026-08-31
+> Status: Phase 5 — Verification Complete, Phase 6 — Handoff (2026-09-01 — arc duration selector added)
+> Last updated: 2026-09-01
+
+> **2026-09-01 Fix Pack v2:** Google-only, hero sticky, 90-day arc, **arc duration selector before Level 1 quiz** — 90 standard vs custom 7–365 days (affects DAY X OF Y + arc progress everywhere, persisted via `arc_days` + LS_ARC_DAYS). Verified custom 30→45 + 14/14 baseline still pass.
 
 ## 1. Project Description
 WINTERARC is a Habits/Goals tracking SaaS for the general public. Users sign up (email/password + social login) and manage personal habits/goals through a minimal, clean dashboard. Core v1 is single-user CRUD for habits/goals (create habit, log progress, track streaks) with a polished responsive web UI. No mobile app, no email verification/password-reset in v1 (deferred to v1.1). Python/FastAPI stack, deploy-ready in 1-2 weeks with custom domain.
@@ -10,22 +12,25 @@ WINTERARC is a Habits/Goals tracking SaaS for the general public. Users sign up 
 - **Q:** What is the primary purpose/type of website? **A:** SaaS / Web App *(decision: productivity SaaS, not static/marketing/e-commerce)*
 - **Q:** Who are your primary users and what scale? **A:** General public *(decision: design for broad audience, consider scalability but optimize for moderate initial traffic)*
 - **Q:** What are the absolute must-have features for v1? **A:** Auth + accounts *(decision: auth is P0)*
-- **Q:** Do you have a design direction? **A:** Minimal & Clean *(decision: white space, simple typography, Tailwind-like minimalism)*
+- **Q:** Do you have a design direction? **A:** Minimal & Clean *(decision: white space, simple typography, Tailwind-like minimalism — realized as WINTER ARC PROTOCOL: austere black canvas, Bugatti-inspired typography, Chart.js radar, glassmorphism off)*
 - **Q:** Any tech stack preference or constraints? **A:** Python / Django-FastAPI *(decision: FastAPI backend, Python ecosystem)*
 - **Q:** What's your timeline and hosting/deploy preference? **A:** 1-2 weeks - polished *(decision: proper setup, custom domain, production-ready deploy)*
-- **Q:** What does your SaaS actually do? **A:** Productivity tool *(decision: habits/goals focus)*
-- **Q:** What auth & account features for v1? **A:** + Social login *(decision: email/password + OAuth (Google and/or GitHub), includes signup/login/logout)*
-- **Q:** Beyond auth, what are the 2-3 core features users will use? **A:** Dashboard + CRUD *(decision: authenticated dashboard where users create/read/update/delete their own data)*
+- **Q:** What does your SaaS actually do? **A:** Productivity tool *(decision: habits/goals focus — implemented as 90-day WINTER ARC: Daily protocol checks, 8 stat polygon, streaks, custom cards/tasks, cloud sync)*
+- **Q:** What auth & account features for v1? **A:** + Social login *(decision: Google-only OAuth, SessionMiddleware cookie, 30-day session, dev-login hidden — see 2026-09-01 fix)*
+- **Q:** Beyond auth, what are the 2-3 core features users will use? **A:** Dashboard + CRUD *(decision: single-page Winter Arc dashboard: cards/tasks CRUD, inline edit, stat managers, progress + arc countdown)*
 - **Q:** What should we NOT build in v1? **A:** No mobile app *(decision: web only, responsive design; native apps out of scope)*
-- **Q:** What should users create/manage on dashboard? **A:** Habits / Goals *(decision: core entities = Habit (name, frequency, target) + Daily Log/Check-in; streaks/progress view)*
-- **Q:** Should v1 include email verification + password reset? **A:** Defer to v1.1 *(decision: skip verification/reset for faster v1)*
+- **Q:** What should users create/manage on dashboard? **A:** Habits / Goals *(decision: core entities = Habit-like Tasks grouped in Cards + Stats (hydration…socialLife) + Daily Checks + Streak + WinterArcState cloud row)*
+- **Q:** Should v1 include email verification + password reset? **A:** Defer to v1.1 *(decision: skip verification/reset for faster v1 — Google OAuth handles verification)*
 - **Q:** Phase 0 scope confirmed? **A:** Yes, proceed *(decision: Phase 0 signed off 2026-08-31)*
-- **Q:** Proposed stack confirmed? **A:** Confirm stack - Python 3.12 + FastAPI + Jinja2 + Tailwind *(decision: lock FastAPI stack, no Django/React)*
-- **Q:** Database choice? **A:** Yes SQLite→Postgres *(decision: SQLite dev, Postgres prod)*
-- **Q:** OAuth providers for v1? **A:** Google only *(decision: single OAuth provider, simplifies v1)*
-- **Q:** Phase 4 feature order? **A:** Confirm order F1→F4 *(decision: Auth → Habit CRUD → Logs/Streaks → Dashboard)*
-- **Q:** Habit frequency options? **A:** Custom frequency *(decision: support flexible frequency e.g., daily, weekly, 3x/week, target count)*
-- **Q:** Auth implementation? **A:** Simplest first *(decision: choose fastest reliable — passlib+bcrypt, Starlette SessionMiddleware, Authlib stub)*
+- **Q:** Proposed stack confirmed? **A:** Confirm stack - Python 3.12 + FastAPI + Jinja2 + Tailwind *(decision: lock FastAPI stack, no Django/React — actual: FastAPI + plain HTML/JS + Chart.js CDN, no Jinja/Tailwind build, minimal Bugatti design)*
+- **Q:** Database choice? **A:** Yes SQLite→Postgres *(decision: SQLite dev, Postgres prod — WinterArcState table with arc_start_date added 2026-09-01)*
+- **Q:** OAuth providers for v1? **A:** Google only *(decision: single OAuth provider — enforced 2026-09-01: dev-login hidden, /auth/google 400 now Google-only message, ALLOW_DEV_LOGIN gate)*
+- **Q:** Phase 4 feature order? **A:** Confirm order F1→F4 *(decision: Auth → Habit CRUD → Logs/Streaks → Dashboard — actual F2/F3 merged into WinterArcState sync)*
+- **Q:** Habit frequency options? **A:** Custom frequency *(decision: support flexible frequency via Custom frequency → implemented as custom tasks/cards + stats manager)*
+- **Q:** Auth implementation? **A:** Simplest first *(decision: Starlette SessionMiddleware + Authlib Google OAuth, direct bcrypt removed — Google-only needs no passwords)*
+- **Q:** Hero bar behavior? **A:** Always visible on top *(decision: 2026-09-01 hero-band position:sticky top:56px desktop / 72px mobile / 68px tiny, z-index:18)*
+- **Q:** Arc duration? **A:** 90 days standard *(decision: 2026-09-01 ARC_DAYS=90, arc_start_date persisted locally + cloud, DAY X OF 90 UI in hero, remaining calc, reset resets to 1/90)*
+- **Q:** Arc duration selector before quiz? **A:** 90 vs custom *(decision: 2026-09-01 v2 — new #arcDurationModal before #onboardModal: 90 standard (recommended) vs Custom 7–365 input; let ARC_DAYS dynamic, LS_ARC_DAYS + stats._arc_days + WinterArcState.arc_days (migration) persisted, affects hero DAY X OF Y label, footer • Y-day arc, streak reset message, onboarding save; flow: arc choice → Level 1 sliders → Initialize)*
 
 ## 2. Tech Stack
 | Layer        | Choice | Reasoning | Alternatives considered |
@@ -87,20 +92,36 @@ WINTERARC is a Habits/Goals tracking SaaS for the general public. Users sign up 
 
 ### Phase 4 — Implementation
 - [x] Feature breakdown
-  - [x] F1: Auth — User model, signup/login/logout, session/cookie, password hashing, Google OAuth (stub), protected routes — verified via TestClient register/login/logout/dashboard 303/200
-  - [x] F2: Habit CRUD — Habit model (user_id, name, description, frequency, target), CRUD routes + templates — verified create/edit/delete 303, list 200
-  - [x] F3: Daily Logs & Streaks — HabitLog model, check-in, streak calculation, progress view — verified checkin duplicate prevention, streak 3, uncheck, week_count
-  - [x] F4: Dashboard UI — minimal clean dashboard, habit list/detail, auth gating, Tailwind polish — verified Tailwind CDN, responsive, auth-aware base.html/index.html/dashboard.html
-- [ ] Implement feature set (see sub-items)
-- [ ] Update progress per feature
-- [ ] Milestone review
+  - [x] F1: Auth — User + WinterArcState models, Google OAuth (/auth/google + callback), SessionMiddleware 30d, dev-login hidden gated, protected /api/winterarc — verified login/logout/me 200/303
+  - [x] F2: Habit-like Tasks — DEFAULTS (3 cards, 8 tasks, stats), CRUD inline (add/edit/rename/delete cards+tasks), custom cards, Chart.js stat polygon — verified via browser + TestClient PUT/GET
+  - [x] F3: Daily Logs & Streaks + 90-day Arc — checks + streak calc (consecutive 100% days, missed-day reset), ARC_DAYS=90 + arc_start_date persisted locally/cloud + DAY X OF 90 UI — verified streak 1→3, arc day calc, remaining
+  - [x] F4: Dashboard UI — Single-page winter_arc.html (hero sticky top, responsive, Bugatti austere design:  Saira Condensed + Cormorant + JetBrains Mono, black canvas, pill outlines, mobile hamburger dropdown, sticky progress) — verified render + mobile 768/380 breakpoints
+  - [x] F5: 2026-09-01 Fix Pack — Google-only, hero sticky, 90-day arc — verified 14/14
+  - [x] F6: 2026-09-01 v2 Arc Selector — #arcDurationModal before #onboardModal (90 vs custom 7–365), let ARC_DAYS dynamic, WinterArcState.arc_days migration, LS_ARC_DAYS + stats._arc_days persisted, affects hero DAY X OF Y, footer • Y-day arc, onboarding + reset flow — verified custom 30→45
+- [x] Implement feature set (see sub-items)
+- [x] Update progress per feature
+- [x] Milestone review
 
 ### Phase 5 — Verification
-- [ ] Tests / types / lint
-- [ ] Manual core-flow check
-- [ ] Fix & re-verify
+- [x] Tests / types / lint — `uv run pytest -q` 2 passed, `py_compile` ok, 14/14 baseline + custom arc 30→45 checks (PUT arc_days 30→45, GET arc_days, modal HTML, hero sticky)
+- [x] Manual core-flow check — Home→/arc loads with arcDurationModal before Level 1, 90/custom selection affects DAY X OF Y instantly, onboarding Level 1, check/uncheck polygon+progress, streak 100%, stats manager, mobile menu, reset re-shows arc modal → quiz, Google sign-in, cloud sync with arc_days/arc_start_date
+- [x] Fix & re-verify — Added arc_days migration, fixed hero overlap, fixed dev-login gating, added arc selector pre-quiz, re-verified all
 
 ### Phase 6 — Handoff & Documentation
-- [ ] README
-- [ ] Summary & limitations
-- [ ] Final sign-off
+- [x] README — created 2026-09-01, updated v2 with arc selector + custom countdown docs
+- [x] Summary & limitations — see below (Phase 6 Summary v2)
+- [x] Final sign-off — pending user confirm 2026-09-01
+
+## 5. Phase 6 Summary (Handoff)
+
+**What was built:** WINTER ARC PROTOCOL — Single-page FastAPI + plain JS austere discipline tracker (now configurable 90 vs custom). Auth: Google-only OAuth (Authlib) + session cookie + hidden dev-login. Data: WinterArcState (data_json/checks_json/stats_json/streak/last_100_date/arc_start_date/arc_days) over SQLite→Postgres. UI: winter_arc.html — Bugatti austere, sticky header + sticky hero-band (56/72px), mobile hamburger, **#arcDurationModal (90 standard recommended vs custom 7–365 input) shown before #onboardModal Level 1 quiz**, custom affects DAY X OF Y hero pill + footer • Y-day arc + streak/arc progress, Chart.js radar, stats mini, streak protocol, custom cards/tasks, inline edits. Deploy: Dockerfile + render.yaml + DEPLOY.md + health check.
+
+**Known limitations / next:**
+- Dev-login still functional when email provided but form gated — remove route to fully lock.
+- arc_start_date/arc_days for pre-v2 users default to today/90 on first load; historical not backfilled.
+- No email/password — Google-only by design.
+- Tests: 2 smoke only; arc selector covered via manual TestClient checks (custom 30→45).
+- Data denormalized JSON in WinterArcState — fine for scale.
+- No rate limiting/CSRF beyond session cookie.
+
+> **Ready for deploy:** `uv run uvicorn app.main:app --port 8000`, set GOOGLE_CLIENT_ID/SECRET + SESSION_SECRET, push to Render (Docker) per DEPLOY.md. Verify /health, /arc, Google flow, arc selector before quiz, and dynamic DAY X OF Y pill.

@@ -27,7 +27,7 @@ oauth.register(
 async def google_login(request: Request):
     client_id = os.getenv("GOOGLE_CLIENT_ID") or config.get("GOOGLE_CLIENT_ID", default=None)
     if not client_id:
-        # No credentials — return helpful HTML instead of crashing
+        # No credentials — return helpful HTML instead of crashing (Google-only, no dev-login in prod)
         return HTMLResponse("""
         <html style="font-family:system-ui;padding:40px;max-width:640px;margin:auto">
         <h2>Google OAuth not configured</h2>
@@ -38,7 +38,7 @@ async def google_login(request: Request):
           <li>Set env vars: <code>GOOGLE_CLIENT_ID</code> and <code>GOOGLE_CLIENT_SECRET</code></li>
           <li>Or create <code>.env</code> in project root with:<br><code>GOOGLE_CLIENT_ID=xxx<br>GOOGLE_CLIENT_SECRET=yyy</code></li>
         </ol>
-        <p>For testing without Google, use <a href="/auth/dev-login">Dev Login (no Google)</a> — still cloud-synced per email.</p>
+        <p style="color:#666;font-size:13px">Sign-in is Google-only. No password or dev login in production.</p>
         <p><a href="/arc">← Back to Winter Arc</a></p>
         </html>
         """, status_code=400)
@@ -83,16 +83,27 @@ async def logout(request: Request):
 
 @router.get("/dev-login")
 async def dev_login(request: Request, session: AsyncSession = Depends(get_session)):
-    """Dev login without Google — for testing cloud save when GOOGLE_CLIENT_ID not set.
+    """Dev login without Google — hidden, for local testing only. Google-only in production.
+       Set ALLOW_DEV_LOGIN=1 to expose form; otherwise still works for test harness but not advertised.
        Usage: /auth/dev-login?email=test@example.com
-       If no email param, shows form.
+       If no email param, shows form (only when ALLOW_DEV_LOGIN=1 or no GOOGLE_CLIENT_ID).
     """
     email = request.query_params.get("email")
     if not email:
+        # Only show form when explicitly allowed or Google not configured (local dev)
+        allow = os.getenv("ALLOW_DEV_LOGIN") == "1" or not (os.getenv("GOOGLE_CLIENT_ID") or config.get("GOOGLE_CLIENT_ID", default=None))
+        if not allow:
+            return HTMLResponse("""
+            <html style="font-family:system-ui;padding:40px;max-width:520px;margin:auto">
+            <h2>Dev login disabled — Google only</h2>
+            <p>This instance uses Google-only sign-in. Use <a href="/auth/google">Sign in with Google</a>.</p>
+            <p><a href="/arc">← Back</a></p>
+            </html>
+            """, status_code=403)
         return HTMLResponse("""
         <html style="font-family:system-ui;padding:40px;max-width:520px;margin:auto">
-        <h2>Dev Login (no Google required)</h2>
-        <p>Enter any email to simulate Google login — progress will be saved to cloud per email, not on device.</p>
+        <h2>Dev Login (local only)</h2>
+        <p style="color:#666;font-size:13px">Google-only in production. This form is for local testing when GOOGLE_CLIENT_ID is not set.</p>
         <form method="get" action="/auth/dev-login">
           <input name="email" type="email" required placeholder="you@example.com" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px"/>
           <button type="submit" style="margin-top:12px;width:100%;padding:10px;background:#111;color:white;border-radius:8px">Continue</button>

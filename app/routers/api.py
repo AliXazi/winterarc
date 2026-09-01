@@ -28,6 +28,7 @@ DEFAULT_DATA = [
 DEFAULT_STATS = {"hydration":5,"nutrition":5,"training":5,"recovery":5,"deepWork":5,"discipline":5,"reading":5,"activeRecall":5}
 STAT_KEYS = ["hydration","nutrition","training","recovery","deepWork","discipline","reading","activeRecall"]
 STAT_LABELS = ["Hydration","Nutrition","Training","Recovery","Deep Work","Discipline","Reading","Active Recall"]
+DEFAULT_ARC_DAYS = 90
 
 def get_user_id(request: Request) -> int | None:
     return request.session.get("user_id")
@@ -36,11 +37,11 @@ def get_user_id(request: Request) -> int | None:
 async def get_winterarc(request: Request, session: AsyncSession = Depends(get_session)):
     uid = get_user_id(request)
     if not uid:
-        return JSONResponse({"authenticated": False, "data": DEFAULT_DATA, "checks": {}, "stats": None, "streak": 0, "last_100_date": None}, status_code=401)
+        return JSONResponse({"authenticated": False, "data": DEFAULT_DATA, "checks": {}, "stats": None, "streak": 0, "last_100_date": None, "arc_start_date": None, "arc_days": DEFAULT_ARC_DAYS}, status_code=401)
     result = await session.execute(select(WinterArcState).where(WinterArcState.user_id == uid))
     state = result.scalar_one_or_none()
     if not state:
-        state = WinterArcState(user_id=uid, data_json=json.dumps(DEFAULT_DATA), checks_json=json.dumps({}), stats_json=json.dumps({}), streak=0, last_100_date=None)
+        state = WinterArcState(user_id=uid, data_json=json.dumps(DEFAULT_DATA), checks_json=json.dumps({}), stats_json=json.dumps({}), streak=0, last_100_date=None, arc_start_date=None, arc_days=DEFAULT_ARC_DAYS)
         session.add(state)
         await session.commit()
         await session.refresh(state)
@@ -56,7 +57,18 @@ async def get_winterarc(request: Request, session: AsyncSession = Depends(get_se
         data = DEFAULT_DATA
         checks = {}
         stats = None
-    return {"authenticated": True, "data": data, "checks": checks, "stats": stats, "streak": state.streak or 0, "last_100_date": state.last_100_date}
+    # arc_start_date: prefer column, fallback to stats._arc_start for legacy
+    arc_start = getattr(state, 'arc_start_date', None)
+    if not arc_start and stats and isinstance(stats, dict) and stats.get('_arc_start'):
+        arc_start = stats.get('_arc_start')
+    # arc_days: column or stats._arc_days or default 90
+    arc_days = getattr(state, 'arc_days', None)
+    if (not arc_days or arc_days == 0) and stats and isinstance(stats, dict) and stats.get('_arc_days'):
+        try: arc_days = int(stats.get('_arc_days'))
+        except: arc_days = DEFAULT_ARC_DAYS
+    if not arc_days or arc_days == 0:
+        arc_days = DEFAULT_ARC_DAYS
+    return {"authenticated": True, "data": data, "checks": checks, "stats": stats, "streak": state.streak or 0, "last_100_date": state.last_100_date, "arc_start_date": arc_start, "arc_days": arc_days}
 
 @router.put("/winterarc")
 async def put_winterarc(request: Request, payload: dict, session: AsyncSession = Depends(get_session)):
@@ -68,6 +80,14 @@ async def put_winterarc(request: Request, payload: dict, session: AsyncSession =
     stats = payload.get("stats")
     streak = payload.get("streak")
     last_100_date = payload.get("last_100_date")
+    arc_start_date = payload.get("arc_start_date")
+    arc_days = payload.get("arc_days")
+    # fallback: stats._arc_start / _arc_days legacy
+    if arc_start_date is None and isinstance(stats, dict) and stats.get('_arc_start'):
+        arc_start_date = stats.get('_arc_start')
+    if arc_days is None and isinstance(stats, dict) and stats.get('_arc_days'):
+        try: arc_days = int(stats.get('_arc_days'))
+        except: pass
     if data is None or checks is None:
         return JSONResponse({"error":"Missing data/checks"}, status_code=400)
     try:
@@ -78,8 +98,16 @@ async def put_winterarc(request: Request, payload: dict, session: AsyncSession =
         return JSONResponse({"error":f"Invalid JSON: {e}"}, status_code=400)
     result = await session.execute(select(WinterArcState).where(WinterArcState.user_id == uid))
     state = result.scalar_one_or_none()
+    # normalize arc_days to int 7-365 or default 90
+    if arc_days is not None:
+        try:
+            arc_days = int(arc_days)
+            if arc_days < 7: arc_days = 7
+            if arc_days > 365: arc_days = 365
+        except:
+            arc_days = None
     if not state:
-        state = WinterArcState(user_id=uid, data_json=data_json, checks_json=checks_json, stats_json=stats_json or json.dumps({}), streak=streak or 0, last_100_date=last_100_date)
+        state = WinterArcState(user_id=uid, data_json=data_json, checks_json=checks_json, stats_json=stats_json or json.dumps({}), streak=streak or 0, last_100_date=last_100_date, arc_start_date=arc_start_date, arc_days=arc_days or DEFAULT_ARC_DAYS)
         session.add(state)
     else:
         state.data_json = data_json
@@ -94,6 +122,12 @@ async def put_winterarc(request: Request, payload: dict, session: AsyncSession =
         # allow explicit null to clear?
         if last_100_date is None and payload.get("last_100_date") is None and "last_100_date" in payload:
             state.last_100_date = None
+        if arc_start_date is not None:
+            state.arc_start_date = arc_start_date
+        if arc_start_date is None and "arc_start_date" in payload and payload.get("arc_start_date") is None:
+            state.arc_start_date = None
+        if arc_days is not None:
+            state.arc_days = arc_days
     await session.commit()
     return {"ok": True}
 

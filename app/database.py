@@ -27,3 +27,16 @@ async def init_db():
     from app import models  # noqa
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        # lightweight migrations
+        try:
+            from sqlalchemy import text
+            if DATABASE_URL.startswith("sqlite"):
+                try: await conn.execute(text("ALTER TABLE winterarc_states ADD COLUMN arc_start_date VARCHAR(20)"))
+                except: pass
+                try: await conn.execute(text("ALTER TABLE winterarc_states ADD COLUMN arc_days INTEGER DEFAULT 90"))
+                except: pass
+            else:
+                await conn.execute(text("ALTER TABLE winterarc_states ADD COLUMN IF NOT EXISTS arc_start_date VARCHAR(20)"))
+                await conn.execute(text("ALTER TABLE winterarc_states ADD COLUMN IF NOT EXISTS arc_days INTEGER DEFAULT 90"))
+        except Exception:
+            pass
