@@ -766,7 +766,7 @@ function updateChartImmediate(){
   const badge=document.getElementById('levelBadge');
   if(badge) badge.textContent='LVL '+Math.floor(avgLevel())+' • '+avgLevel()+' avg';
   const mini=document.getElementById('statsMini');
-  if(mini) mini.innerHTML=STAT_KEYS.map(k=>`<div class="mini"><b>${(STATS[k]!=null?STATS[k]:5).toFixed(1)}</b><span>${escapeHtml(k)}</span></div>`).join('');
+  if(mini) mini.innerHTML=STAT_KEYS.map((k,i)=>`<div class="mini"><b>${(STATS[k]!=null?STATS[k]:5).toFixed(1)}</b><span>${escapeHtml(STAT_LABELS[i]||k)}</span></div>`).join('');
   // force resize in case canvas was hidden during modal
   try{ chart.resize(); }catch{}
 }
@@ -1016,10 +1016,16 @@ document.getElementById('saveStatsBtn').addEventListener('click',async()=>{
   if(!STATS) STATS={};
   STAT_KEYS.forEach(k=>{ if(!(k in STATS)) STATS[k]=5; });
   Object.keys(STATS).forEach(k=>{ if(k==='_defs') return; if(!STAT_KEYS.includes(k)) delete STATS[k]; });
+  // build defs before UI update
+  STATS._defs=STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]}));
+  try{ localStorage.setItem(LS_STAT_DEFS, JSON.stringify(STATS._defs)); }catch{}
+  try{ localStorage.setItem(LS_STATS, JSON.stringify(STATS)); }catch{}
   statsModal.classList.remove('open');
+  // instant visual update — no wait for reload
+  try{ updateChartImmediate(); }catch{}
+  try{ render(); }catch{}
+  try{ syncMobMeta(); }catch{}
   toast('Stats updated — reloading');
-  // ensure defs persisted then reload
-  saveStatDefs();
   await doReload();
 });
 
