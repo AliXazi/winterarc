@@ -80,9 +80,10 @@
     .brand h1{font-size:13.5px;letter-spacing:5px;line-height:1.1}
     .brand p{font-size:10px;letter-spacing:1.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:6px}
     .header-actions{gap:8px;justify-content:flex-end;align-items:center;flex-shrink:0;margin-left:auto;flex-wrap:nowrap}
-    /* mobile: only Sign in (+ user pill when authed) visible in bar — rest moves to dropdown */
-    .header-actions .pill,.header-actions .streak,#countPill,#streakPill,#storagePill,#resetBtn{display:none !important}
-    .header-actions .btn.google, .header-actions #googleBtn{display:inline-flex !important;margin-left:auto;min-width:92px;justify-content:center;align-items:center;height:36px;padding:0 18px;font-size:11px;letter-spacing:1.5px}
+    /* mobile: Sign in + Support (+ user pill when authed) visible in bar — rest moves to dropdown */
+     .header-actions .pill,.header-actions .streak,#countPill,#streakPill,#storagePill,#resetBtn{display:none !important}
+     .header-actions .btn.google, .header-actions #googleBtn{display:inline-flex !important;margin-left:auto;min-width:92px;justify-content:center;align-items:center;height:36px;padding:0 18px;font-size:11px;letter-spacing:1.5px}
+     .header-actions .btn.support{display:inline-flex !important}
     #authArea .user-pill{height:36px}
     #authArea .user-pill img{width:36px;height:36px}
     #authArea .user-pill span{max-width:90px;font-size:10px}
@@ -91,12 +92,13 @@
     .hero-band{padding-top:48px}
   }
   @media (max-width:380px){
-    header{min-height:68px;padding:14px 0;padding-top:max(14px, env(safe-area-inset-top))}
-    .brand h1{font-size:12.5px;letter-spacing:4px}
-    .brand p{font-size:9px;letter-spacing:1px}
-    .header-actions .btn.google, .header-actions #googleBtn{min-width:78px;height:34px;font-size:10px;padding:0 12px}
-    .mob-toggle{width:36px;height:36px;font-size:16px}
-  }
+     header{min-height:68px;padding:14px 0;padding-top:max(14px, env(safe-area-inset-top))}
+     .brand h1{font-size:12.5px;letter-spacing:4px}
+     .brand p{font-size:9px;letter-spacing:1px}
+     .header-actions .btn.google, .header-actions #googleBtn{min-width:78px;height:34px;font-size:10px;padding:0 12px}
+     .header-actions .btn.support{height:34px;padding:0 10px;font-size:10px;gap:6px}
+     .mob-toggle{width:36px;height:36px;font-size:16px}
+   }
   .brand h1{
     margin:0;
     font-family:"Saira Condensed", sans-serif;
@@ -146,6 +148,13 @@
   .btn.google{background:transparent;color:var(--text);border-color:var(--text)}
   .btn.google:hover{background:var(--text);color:#000}
   .btn.small{padding:8px 16px;height:32px;font-size:11px;letter-spacing:2px}
+  .btn.support{padding:8px 14px;height:32px;font-size:11px;letter-spacing:1.8px;gap:7px;border-color:var(--hairline-strong);color:var(--body);background:rgba(255,255,255,0.04)}
+  .btn.support:hover{background:var(--text);color:#000;border-color:var(--text)}
+  .btn.support .support-mark{width:18px;height:18px;border-radius:9999px;background:var(--text);color:#000;display:grid;place-items:center;font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;line-height:1;flex-shrink:0;border:1px solid var(--text);transition:background .15s,color .15s}
+  .btn.support:hover .support-mark{background:#000;color:var(--text);border-color:#000}
+  /* header support — fancy but austere */
+  .header-actions .btn.support{height:32px}
+  @media (max-width:768px){ .header-actions .btn.support{height:36px;padding:0 14px;font-size:10px;letter-spacing:1.4px} .header-actions .btn.support .support-mark{width:18px;height:18px;font-size:11px}}
   .user-pill{
     display:flex;align-items:center;gap:8px;
     padding:0 12px 0 0;
@@ -403,6 +412,7 @@
           <div class="streak" id="streakPill" title="Consecutive 100% days"><span class="flame">—</span> <span id="streakNum">0</span></div>
           <span class="pill" id="storagePill">Local</span>
           <button class="btn" id="resetBtn">Reset</button>
+          <button class="btn support" id="headerSupportBtn" title="Support Winter Arc — UPI & Ko-fi" aria-label="Support Winter Arc"><span class="support-mark">$</span> Support</button>
           <a class="btn google" id="googleBtn" href="/auth/google">Sign in</a>
           <button class="mob-toggle" id="mobMenuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="mobMenu">☰</button>
         </div>
@@ -1189,9 +1199,10 @@ function renderStatsManager(){
 document.getElementById('manageStatsBtn').addEventListener('click',()=>{ renderStatsManager(); statsModal.classList.add('open'); });
 document.getElementById('closeStatsBtn').addEventListener('click',()=> statsModal.classList.remove('open'));
 statsModal.addEventListener('click',e=>{ if(e.target===statsModal) statsModal.classList.remove('open'); });
-// Support modal — subtle UPI donate
+// Support modal — subtle UPI donate (footer + header $ Support)
 const supportModal=document.getElementById('supportModal');
 document.getElementById('supportLink')?.addEventListener('click',e=>{ e.preventDefault(); supportModal?.classList.add('open'); });
+document.getElementById('headerSupportBtn')?.addEventListener('click',e=>{ e.preventDefault(); supportModal?.classList.add('open'); });
 document.getElementById('closeSupportBtn')?.addEventListener('click',()=> supportModal?.classList.remove('open'));
 supportModal?.addEventListener('click',e=>{ if(e.target===supportModal) supportModal.classList.remove('open'); });
 document.getElementById('copyUPIBtn')?.addEventListener('click',async()=>{

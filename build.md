@@ -1,9 +1,9 @@
 # Build Log: WINTERARC
 
-> Status: Phase 5 — Verification Complete, Phase 6 — Handoff (2026-09-01 — arc duration selector + winterarc.online live)
-> Last updated: 2026-09-01
+> Status: Phase 6 — Handoff Complete — PAUSED 1 WEEK (marketing + SEO/AdSense queue)
+> Last updated: 2026-09-02
 
-> **Live:** https://winterarc.online (custom domain, Render fallback https://winterarc-a1ua.onrender.com) — both serve `winter_arc.html` with #arcDurationModal. **Fix Pack v2** Google-only, hero sticky, 90-day arc, arc selector 90 vs custom 7–365 (affects DAY X OF Y, persisted via `arc_days` + LS_ARC_DAYS). Verified custom 30→45 + 14/14.
+> **Live:** https://winterarc.online (custom domain, Render fallback https://winterarc-a1ua.onrender.com) — all fixes live: topbar restored (Local badge removed, hero + bottom progress centred, footer roomier), fox favicon, SEO sitemap/robots, branding verified. **Paused until 2026-09-09** for marketing + Search Console indexing → then AdSense + keyword expansion.
 
 ## 1. Project Description
 WINTERARC is a Habits/Goals tracking SaaS for the general public. Users sign up (email/password + social login) and manage personal habits/goals through a minimal, clean dashboard. Core v1 is single-user CRUD for habits/goals (create habit, log progress, track streaks) with a polished responsive web UI. No mobile app, no email verification/password-reset in v1 (deferred to v1.1). Python/FastAPI stack, deploy-ready in 1-2 weeks with custom domain.
@@ -108,9 +108,17 @@ WINTERARC is a Habits/Goals tracking SaaS for the general public. Users sign up 
 - [x] Fix & re-verify — Added arc_days migration, fixed hero overlap, fixed dev-login gating, added arc selector pre-quiz, re-verified all
 
 ### Phase 6 — Handoff & Documentation
-- [x] README — created 2026-09-01, updated v2 with arc selector + custom countdown docs
+- [x] README — created 2026-09-01, updated v2 with arc selector + custom countdown docs (+ SEO sitemap/robots)
 - [x] Summary & limitations — see below (Phase 6 Summary v2)
-- [x] Final sign-off — pending user confirm 2026-09-01
+- [x] Final sign-off — confirmed live (winterarc.online + render fallback, SEO green, branding verified)
+- [ ] Next checkpoint — 2026-09-09 marketing week review (see Pause Note below)
+
+## 5.1 Pause Note — Where We Left (2026-09-02)
+**Paused for 1 week** per user: *ok we wait for 1 week, i work on marketing in social media*.
+- **Prior fixes just before pause:** Topbar glitch fixed (sticky-stack → header only), progress bars → hero + bottom centred + roomier (bottom 96px, hint 64/32, footer 48/48), footer top line nudged up, Local badge hidden (privacy §12 + FAQ contact → webmayhemx@gmail.com, Terms §12 already), unauthenticated init quiz fix (saveStatDefs recursion → now arc→quiz works when not logged in), custom stat value 1–10 on add, Support donate via UPI `winterarconline@axl` + Ko-fi `xaziwinter`, fox `static/icon.png` favicon + improved meta `Enter the Winter Arc. Transform in 90 days...`, SEO `sitemap.xml` + `robots.txt` + canonical, branding verified green, Search Console `URL is on Google` indexed, AdSense deferred.
+- **Marketing task (owner):** Share `https://winterarc.online` on X/Redit/Product Hunt etc. for backlinks/crawl.
+- **Resume 2026-09-09:** Check Search Console `Performance` → Queries (first impressions), decide to add `/guide` keyword page for AdSense pass, then add AdSense script + `ads.txt`. No code changes needed until then.
+- **Live URLs to verify on resume:** `https://winterarc.online` (fox favicon), `https://winterarc.online/sitemap.xml` (5 URLs), `https://winterarc.online/health` (`winter-arc-cloud`), Support modal (UPI + Ko-fi).
 
 ## 5. Phase 6 Summary (Handoff)
 
