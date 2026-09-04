@@ -33,27 +33,27 @@ app.include_router(api_router.router)
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
-    return FileResponse(str(BASE_DIR / "winter_arc.html"))
+    return FileResponse(str(BASE_DIR / "winter_arc.html"), headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0", "Pragma": "no-cache"})
 
 @app.get("/arc", response_class=HTMLResponse)
 async def arc():
-    return FileResponse(str(BASE_DIR / "winter_arc.html"))
+    return FileResponse(str(BASE_DIR / "winter_arc.html"), headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0", "Pragma": "no-cache"})
 
 @app.get("/winter-arc", response_class=HTMLResponse)
 async def winter_arc():
-    return FileResponse(str(BASE_DIR / "winter_arc.html"))
+    return FileResponse(str(BASE_DIR / "winter_arc.html"), headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0", "Pragma": "no-cache"})
 
 @app.get("/terms", response_class=HTMLResponse)
 async def terms():
-    return FileResponse(str(BASE_DIR / "templates" / "terms.html"))
+    return FileResponse(str(BASE_DIR / "templates" / "terms.html"), headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"})
 
 @app.get("/privacy", response_class=HTMLResponse)
 async def privacy():
-    return FileResponse(str(BASE_DIR / "templates" / "privacy.html"))
+    return FileResponse(str(BASE_DIR / "templates" / "privacy.html"), headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"})
 
 @app.get("/faq", response_class=HTMLResponse)
 async def faq():
-    return FileResponse(str(BASE_DIR / "templates" / "faq.html"))
+    return FileResponse(str(BASE_DIR / "templates" / "faq.html"), headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"})
 
 @app.get("/sitemap.xml")
 async def sitemap():
