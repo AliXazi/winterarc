@@ -448,7 +448,7 @@
           <button class="btn small" id="manageStatsBtn">Edit Stats</button>
         </div>
       </div>
-      <p class="stat-sub">Polygon reflects all tracked stats. Each check adds +0.18. Scale 0 — 10.</p>
+      <p class="stat-sub" id="statSub">Polygon reflects all tracked stats. Each check adds +0.10. Scale 1 — 10.</p>
       <div class="chart-wrap"><canvas id="radar"></canvas></div>
       <div class="stats-mini" id="statsMini"></div>
     </section>
@@ -574,7 +574,7 @@
     <div style="display:flex;justify-content:center;margin:16px 0"><img id="supportQR" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi%3A%2F%2Fpay%3Fpa%3Dwinterarconline%40axl%26pn%3DWinter%2520Arc%26cu%3DINR" alt="UPI QR winterarconline@axl" width="220" height="220" style="border:1px solid var(--hairline);padding:8px;background:#fff"/></div>
     <div style="font-family:JetBrains Mono,monospace;font-size:12px;letter-spacing:1px;color:var(--text);margin:8px 0;word-break:break-all">winterarconline@axl</div>
     <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px">
-      <a class="btn small" href="upi://pay?pa=winterarconline@axl&pn=Winter%20Arc&cu=INR">Open UPI App</a>
+      <a class="btn small" id="upiLink" href="upi://pay?pa=winterarconline@axl&pn=Winter%20Arc&cu=INR">Open UPI App</a>
       <button class="btn small" id="copyUPIBtn">Copy UPI</button>
     </div>
     <div style="margin:20px 0 8px;padding-top:16px;border-top:1px solid var(--hairline)">
@@ -695,15 +695,20 @@ function arcDayNumber(){
   return Math.min(ARC_DAYS, Math.max(1, diff+1));
 }
 function arcRemaining(){ return Math.max(0, ARC_DAYS - arcDayNumber()); }
+function updateStatGainUI(){
+  const el=document.getElementById('statSub');
+  if(el) el.textContent=`Polygon reflects all tracked stats. Each check adds +${getStatIncrement().toFixed(2)} (scales with ${ARC_DAYS}-DAY ARC). Scale 1 — 10.`;
+}
 function updateArcUI(){
   const el=document.getElementById('arcMeta');
-  if(!el) return;
-  const day=arcDayNumber();
-  const rem=arcRemaining();
-  const label = ARC_DAYS===90 ? '90-DAY ARC' : `${ARC_DAYS}-DAY ARC`;
-  if(day>=ARC_DAYS) el.textContent=`DAY ${ARC_DAYS} OF ${ARC_DAYS} — ARC COMPLETE • ${label}`;
-  else el.textContent=`DAY ${day} OF ${ARC_DAYS} — ${rem} REMAINING • ${label}`;
-  // also update title suffix if needed
+  if(el){
+    const day=arcDayNumber();
+    const rem=arcRemaining();
+    const label = ARC_DAYS===90 ? '90-DAY ARC' : `${ARC_DAYS}-DAY ARC`;
+    if(day>=ARC_DAYS) el.textContent=`DAY ${ARC_DAYS} OF ${ARC_DAYS} — ARC COMPLETE • ${label}`;
+    else el.textContent=`DAY ${day} OF ${ARC_DAYS} — ${rem} REMAINING • ${label}`;
+  }
+  updateStatGainUI();
 }
 function ensureArcStart(){
   if(!ARC_START){
@@ -755,6 +760,11 @@ function showArcDurationModal(onDone){
   modal.addEventListener('click',function once(e){ if(e.target===modal){ modal.classList.remove('open'); } });
 }
 function avgLevel(){ const v=STAT_KEYS.map(k=>STATS[k]||5); return (v.reduce((a,b)=>a+b,0)/v.length).toFixed(1); }
+function getStatIncrement(){
+  const raw = 9 / ARC_DAYS;
+  const clamped = Math.min(0.5, Math.max(0.02, raw));
+  return +clamped.toFixed(2);
+}
 function slugKey(label){ return label.trim().toLowerCase().replace(/[^a-z0-9]+/g,'').replace(/^./,c=>c.toLowerCase()) || ('stat'+Date.now()); }
 
 function loadStatDefs(){
@@ -1019,10 +1029,12 @@ function render(){
       const isDone=!!CHECKS[t.id];
       const row=document.createElement('div'); row.className='task'+(isDone?' done':''); row.dataset.id=t.id;
       const statLabel=STAT_LABELS[STAT_KEYS.indexOf(t.stat)] || t.stat;
+      const showStatPill = statLabel.trim().toLowerCase() !== t.title.trim().toLowerCase();
+      const statPillHtml = showStatPill ? `<span>${escapeHtml(statLabel)}</span>` : '';
       row.innerHTML=`
         <input type="checkbox" class="cb" ${isDone?'checked':''} aria-label="toggle">
         <div class="task-main">
-          <div class="task-title"><span class="label">${escapeHtml(t.title)}</span> <span>${escapeHtml(statLabel)}</span></div>
+          <div class="task-title"><span class="label">${escapeHtml(t.title)}</span> ${statPillHtml}</div>
           <div class="task-desc" data-field="desc" spellcheck="false">${escapeHtml(t.desc)}</div>
         </div>
         <div class="task-actions">
@@ -1039,8 +1051,9 @@ function render(){
         CHECKS[t.id]=cb.checked;
         const key=t.stat||STAT_KEYS[0];
         if(STATS && STAT_KEYS.includes(key)){
-          if(cb.checked && !wasDone) STATS[key]=Math.min(10, +(STATS[key]+0.18).toFixed(2));
-          else if(!cb.checked && wasDone) STATS[key]=Math.max(1, +(STATS[key]-0.18).toFixed(2));
+          const inc=getStatIncrement();
+          if(cb.checked && !wasDone) STATS[key]=Math.min(10, +(STATS[key]+inc).toFixed(2));
+          else if(!cb.checked && wasDone) STATS[key]=Math.max(1, +(STATS[key]-inc).toFixed(2));
         }
         row.classList.toggle('done',cb.checked);
         refreshUI();
@@ -1208,6 +1221,15 @@ supportModal?.addEventListener('click',e=>{ if(e.target===supportModal) supportM
 document.getElementById('copyUPIBtn')?.addEventListener('click',async()=>{
   try{ await navigator.clipboard.writeText('winterarconline@axl'); toast('UPI copied — winterarconline@axl'); }
   catch{ prompt('Copy UPI:', 'winterarconline@axl'); }
+});
+document.getElementById('upiLink')?.addEventListener('click', (e)=>{
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if(!isMobile){
+    e.preventDefault();
+    toast('Scan QR with any UPI app - desktop cannot open UPI chooser');
+    return;
+  }
+  setTimeout(()=>{ if(!document.hidden) toast('Choose your UPI app - if nothing opened, use QR or Copy UPI'); }, 1300);
 });
 document.getElementById('addStatBtn').addEventListener('click',()=>{
   const input=document.getElementById('newStatLabel');
