@@ -12,22 +12,16 @@ ADMIN_EMAIL = "mohammedxazi@gmail.com"
 def require_admin(request: Request):
     email = (request.session.get("user_email") or "").lower().strip()
     if email != ADMIN_EMAIL.lower():
-        raise HTTPException(status_code=403, detail=f"Admin only. Sign in with {ADMIN_EMAIL} at /auth/google")
+        # hide existence — return 404 instead of 403 so others don't know admin exists
+        raise HTTPException(status_code=404, detail="Not found")
 
 @router.get("", response_class=HTMLResponse)
 async def admin_home(request: Request, session: AsyncSession = Depends(get_session)):
     try:
         require_admin(request)
-    except HTTPException as e:
-        return HTMLResponse(f"""
-        <html style="font-family:system-ui;padding:40px;max-width:640px;margin:auto;background:#000;color:#fff">
-        <h2 style="color:#fff">Admin — Access Denied</h2>
-        <p>Sign in with <b>{ADMIN_EMAIL}</b> to view stats.</p>
-        <p>Current session: <code>{request.session.get('user_email') or 'not signed in'}</code></p>
-        <p><a href="/auth/google" style="color:#fff;border:1px solid #fff;padding:8px 14px;text-decoration:none">Sign in with Google</a> <a href="/" style="color:#999;margin-left:12px">← Back</a></p>
-        <p style="color:#666;font-size:12px;margin-top:24px">webmayhemx@gmail.com is the public contact (FAQ/Privacy). Admin is {ADMIN_EMAIL} only.</p>
-        </html>
-        """, status_code=403)
+    except HTTPException:
+        # hide — 404 for non-admin
+        return HTMLResponse("<html style=\"font-family:system-ui;padding:40px;max-width:640px;margin:auto;background:#000;color:#fff\"><h2>404 — Not Found</h2><p>The page you’re looking for doesn’t exist.</p><p><a href=\"/\" style=\"color:#999\">← Back to Protocol</a></p></html>", status_code=404)
     # fetch counts
     total_users = (await session.execute(select(func.count()).select_from(User))).scalar() or 0
     google_users = (await session.execute(select(func.count()).select_from(User).where(User.google_sub.is_not(None)))).scalar() or 0
