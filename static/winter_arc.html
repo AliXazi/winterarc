@@ -1028,13 +1028,10 @@ function render(){
       if(t.stat==='activeRecall') t.stat='socialLife';
       const isDone=!!CHECKS[t.id];
       const row=document.createElement('div'); row.className='task'+(isDone?' done':''); row.dataset.id=t.id;
-      const statLabel=STAT_LABELS[STAT_KEYS.indexOf(t.stat)] || t.stat;
-      const showStatPill = statLabel.trim().toLowerCase() !== t.title.trim().toLowerCase();
-      const statPillHtml = showStatPill ? `<span>${escapeHtml(statLabel)}</span>` : '';
       row.innerHTML=`
         <input type="checkbox" class="cb" ${isDone?'checked':''} aria-label="toggle">
         <div class="task-main">
-          <div class="task-title"><span class="label">${escapeHtml(t.title)}</span> ${statPillHtml}</div>
+          <div class="task-title"><span class="label">${escapeHtml(t.title)}</span></div>
           <div class="task-desc" data-field="desc" spellcheck="false">${escapeHtml(t.desc)}</div>
         </div>
         <div class="task-actions">
