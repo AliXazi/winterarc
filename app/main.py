@@ -28,8 +28,10 @@ app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="stat
 # routers
 from app.routers import auth as auth_router
 from app.routers import api as api_router
+from app.routers import admin as admin_router
 app.include_router(auth_router.router)
 app.include_router(api_router.router)
+app.include_router(admin_router.router)
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
