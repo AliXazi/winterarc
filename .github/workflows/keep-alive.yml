@@ -1,0 +1,17 @@
+name: keep-alive
+
+on:
+  schedule:
+    - cron: '*/14 * * * *' # every 14 min to beat Render 15 min spin-down
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Ping winterarc.online
+        run: |
+          curl -fsS --max-time 30 https://winterarc.online/health || echo "ping winterarc.online failed"
+          curl -fsS --max-time 30 https://winterarc-a1ua.onrender.com/health || echo "ping onrender failed"
+          echo "ping done at $(date -u)"

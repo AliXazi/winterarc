@@ -13,12 +13,8 @@ services:
       - key: GOOGLE_CLIENT_SECRET
         sync: false
       - key: DATABASE_URL
-        fromDatabase:
-          name: winterarc-db
-          property: connectionString
+        sync: false # set to Neon/Supabase URL in Render Dashboard -> Environment
 
-databases:
-  - name: winterarc-db
-    plan: free
-    databaseName: winterarc
-    user: winterarc
+# Free Postgres on Render expires after 90 days and burns 750h quota.
+# Using Neon (free, no sleep) lets the web service stay up 31/31 days with the keep-alive pinger.
+# databases: removed - use external Postgres instead
