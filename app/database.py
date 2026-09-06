@@ -13,7 +13,24 @@ elif _raw.startswith("postgresql://") and "+asyncpg" not in _raw:
 # sqlite keep as is
 DATABASE_URL = _raw
 
-engine = create_async_engine(DATABASE_URL, echo=False)
+# Neon pooler URLs contain ?sslmode=require&channel_binding=require which asyncpg
+# doesn't accept as kwargs (asyncpg expects ssl=True). Strip those query params
+# and force SSL for neon.tech / any sslmode=require URL.
+_connect_args = {}
+_clean_url = DATABASE_URL
+if "neon.tech" in DATABASE_URL or "sslmode=" in DATABASE_URL or "channel_binding=" in DATABASE_URL:
+    from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+    _parsed = urlparse(DATABASE_URL)
+    _qs = parse_qs(_parsed.query)
+    _needs_ssl = "sslmode" in _qs or "neon.tech" in DATABASE_URL
+    _qs.pop("sslmode", None)
+    _qs.pop("channel_binding", None)
+    _clean_url = urlunparse((_parsed.scheme, _parsed.netloc, _parsed.path, _parsed.params, urlencode(_qs, doseq=True), _parsed.fragment))
+    if _needs_ssl:
+        _connect_args["ssl"] = True
+    DATABASE_URL = _clean_url
+
+engine = create_async_engine(DATABASE_URL, echo=False, connect_args=_connect_args)
 async_session = async_sessionmaker(engine, expire_on_commit=False)
 
 class Base(DeclarativeBase):

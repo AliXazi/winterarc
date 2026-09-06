@@ -6,3 +6,10 @@ __pycache__/
 *.sqlite
 .DS_Store
 .pytest_cache/
+.neon
+.env.local
+# Neon tooling (node) - not needed for Python deploy
+node_modules/
+package-lock.json
+.agents/
+skills-lock.json
