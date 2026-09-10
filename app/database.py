@@ -4,7 +4,10 @@ from sqlalchemy.orm import DeclarativeBase
 from pathlib import Path
 
 # Render/Railway/Fly provide DATABASE_URL (postgres://...). Fallback to sqlite for local.
-_raw = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./winterarc.db")
+_raw = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./winterarc.db").strip()
+# tolerate pasted quotes from dashboards: "postgresql://..." or 'postgresql://...'
+if len(_raw) >= 2 and ((_raw[0] == '"' and _raw[-1] == '"') or (_raw[0] == "'" and _raw[-1] == "'")):
+    _raw = _raw[1:-1].strip()
 # Render gives postgres:// but sqlalchemy needs postgresql://
 if _raw.startswith("postgres://"):
     _raw = _raw.replace("postgres://", "postgresql+asyncpg://", 1)
