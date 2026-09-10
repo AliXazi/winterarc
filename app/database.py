@@ -55,8 +55,11 @@ async def init_db():
                 except: pass
                 try: await conn.execute(text("ALTER TABLE winterarc_states ADD COLUMN arc_days INTEGER DEFAULT 90"))
                 except: pass
+                try: await conn.execute(text("ALTER TABLE winterarc_states ADD COLUMN checks_date VARCHAR(20)"))
+                except: pass
             else:
                 await conn.execute(text("ALTER TABLE winterarc_states ADD COLUMN IF NOT EXISTS arc_start_date VARCHAR(20)"))
                 await conn.execute(text("ALTER TABLE winterarc_states ADD COLUMN IF NOT EXISTS arc_days INTEGER DEFAULT 90"))
+                await conn.execute(text("ALTER TABLE winterarc_states ADD COLUMN IF NOT EXISTS checks_date VARCHAR(20)"))
         except Exception:
             pass

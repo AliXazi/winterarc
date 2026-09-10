@@ -619,8 +619,8 @@ const DEFAULTS=[
 ];
 let ARC_DAYS=90;
 const DEFAULT_ARC_DAYS=90;
-const LS_TASKS='winterarc-tasks-v2', LS_CHECKS='winterarc-checks-v2', LS_STATS='winterarc-stats-v2', LS_STREAK='winterarc-streak', LS_LAST='winterarc-last100', LS_STAT_DEFS='winterarc-stat-defs-v1', LS_ARC_START='winterarc-arc-start-v1', LS_ARC_DAYS='winterarc-arc-days-v1';
-let DATA=[], CHECKS={}, STATS=null, STREAK=0, LAST_100=null, ARC_START=null, AUTH={authenticated:false};
+const LS_TASKS='winterarc-tasks-v2', LS_CHECKS='winterarc-checks-v2', LS_STATS='winterarc-stats-v2', LS_STREAK='winterarc-streak', LS_LAST='winterarc-last100', LS_STAT_DEFS='winterarc-stat-defs-v1', LS_ARC_START='winterarc-arc-start-v1', LS_ARC_DAYS='winterarc-arc-days-v1', LS_CHECKS_DATE='winterarc-checks-date-v1';
+let DATA=[], CHECKS={}, CHECKS_DATE=null, STATS=null, STREAK=0, LAST_100=null, ARC_START=null, AUTH={authenticated:false};
 let chart=null, saveTimer=null;
 
 // --- mobile dropdown (mobile-only) ---
@@ -672,8 +672,8 @@ async function doReload(){
   try{
     if(AUTH.authenticated){
       clearTimeout(saveTimer);
-      const payload={data:DATA,checks:CHECKS,stats:STATS,streak:STREAK,last_100_date:LAST_100,arc_start_date:ARC_START,arc_days:ARC_DAYS};
-      if(STATS) payload.stats={...STATS, _defs:STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]})), _arc_days:ARC_DAYS, _arc_start:ARC_START};
+      const payload={data:DATA,checks:CHECKS,checks_date:CHECKS_DATE,stats:STATS,streak:STREAK,last_100_date:LAST_100,arc_start_date:ARC_START,arc_days:ARC_DAYS};
+      if(STATS) payload.stats={...STATS, _defs:STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]})), _arc_days:ARC_DAYS, _arc_start:ARC_START, _checks_date:CHECKS_DATE};
       const ctrl=new AbortController();
       const t=setTimeout(()=>ctrl.abort(),4000);
       await fetch('/api/winterarc',{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload), signal:ctrl.signal});
@@ -683,6 +683,7 @@ async function doReload(){
         saveStatDefs();
         localStorage.setItem(LS_TASKS, JSON.stringify(DATA));
         localStorage.setItem(LS_CHECKS, JSON.stringify(CHECKS));
+        if(CHECKS_DATE) localStorage.setItem(LS_CHECKS_DATE, CHECKS_DATE);
         localStorage.setItem(LS_STATS, JSON.stringify(STATS));
         localStorage.setItem(LS_STREAK, String(STREAK));
         if(LAST_100) localStorage.setItem(LS_LAST, LAST_100); else localStorage.removeItem(LS_LAST);
@@ -698,6 +699,19 @@ async function doReload(){
 }
 function todayStr(){ return new Date().toISOString().slice(0,10); }
 function yesterdayStr(){ const d=new Date(); d.setDate(d.getDate()-1); return d.toISOString().slice(0,10); }
+// Daily reset: CHECKS belong to one calendar day (UTC). Call after load;
+// returns true when CHECKS was cleared/initialized so caller should save.
+function maybeResetChecksForNewDay(){
+  const today=todayStr();
+  if(!CHECKS_DATE){
+    const hasTicks=Object.values(CHECKS).some(Boolean);
+    if(hasTicks && LAST_100!==today){ CHECKS={}; }
+    CHECKS_DATE=today;
+    return true;
+  }
+  if(CHECKS_DATE!==today){ CHECKS={}; CHECKS_DATE=today; return true; }
+  return false;
+}
 function arcDayNumber(){
   if(!ARC_START) return 1;
   const diff=Math.floor((new Date(todayStr())-new Date(ARC_START))/(1000*60*60*24));
@@ -815,6 +829,7 @@ function saveStatDefs(){
     STATS._defs=defs;
     STATS._arc_days=ARC_DAYS;
     STATS._arc_start=ARC_START;
+    STATS._checks_date=CHECKS_DATE;
   }
 }
 
@@ -834,8 +849,9 @@ async function saveCloud(){
         STATS._defs=STAT_KEYS.map((k,i)=>({key:k,label:STAT_LABELS[i]}));
         STATS._arc_days=ARC_DAYS;
         STATS._arc_start=ARC_START;
+        STATS._checks_date=CHECKS_DATE;
       }
-      const res=await fetch('/api/winterarc',{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:DATA,checks:CHECKS,stats:STATS,streak:STREAK,last_100_date:LAST_100,arc_start_date:ARC_START,arc_days:ARC_DAYS})});
+      const res=await fetch('/api/winterarc',{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:DATA,checks:CHECKS,checks_date:CHECKS_DATE,stats:STATS,streak:STREAK,last_100_date:LAST_100,arc_start_date:ARC_START,arc_days:ARC_DAYS})});
       if(res.ok){ document.getElementById('storagePill').textContent='Cloud synced'; }
     }catch{}
   },400);
@@ -845,6 +861,7 @@ function saveLocal(){
   saveStatDefs();
   localStorage.setItem(LS_TASKS, JSON.stringify(DATA));
   localStorage.setItem(LS_CHECKS, JSON.stringify(CHECKS));
+  if(CHECKS_DATE) localStorage.setItem(LS_CHECKS_DATE, CHECKS_DATE);
   localStorage.setItem(LS_STATS, JSON.stringify(STATS));
   localStorage.setItem(LS_STREAK, String(STREAK));
   if(LAST_100) localStorage.setItem(LS_LAST, LAST_100); else localStorage.removeItem(LS_LAST);
@@ -883,6 +900,7 @@ function loadLocal(){
       data.forEach(cat=>cat.tasks.forEach(t=>{ if(t.stat==='activeRecall') t.stat='socialLife'; }));
     }
     const checks=JSON.parse(localStorage.getItem(LS_CHECKS)||'{}');
+    let checksDate=localStorage.getItem(LS_CHECKS_DATE)||null;
     let stats=null;
     try{ stats=JSON.parse(localStorage.getItem(LS_STATS)||'null'); }catch{}
     let streak=parseInt(localStorage.getItem(LS_STREAK)||'0',10)||0;
@@ -891,9 +909,10 @@ function loadLocal(){
     let arcDays=parseInt(localStorage.getItem(LS_ARC_DAYS)||'0',10)||0;
     if(arcDays<7 || arcDays>365) arcDays=0;
     if(!arcDays && stats && stats._arc_days) { try{ arcDays=parseInt(stats._arc_days,10)||0; }catch{} }
+    if(!checksDate && stats && stats._checks_date) checksDate=stats._checks_date;
     if(!stats) stats=null;
-    return {data,checks,stats,streak,last,arcStart,arcDays};
-  }catch{ return {data:clone(DEFAULTS),checks:{},stats:null,streak:0,last:null,arcStart:null,arcDays:0}; }
+    return {data,checks,checksDate,stats,streak,last,arcStart,arcDays};
+  }catch{ return {data:clone(DEFAULTS),checks:{},checksDate:null,stats:null,streak:0,last:null,arcStart:null,arcDays:0}; }
 }
 function initChart(){
   const canvas=document.getElementById('radar');
@@ -1055,6 +1074,7 @@ function render(){
       cb.addEventListener('change',()=>{
         const wasDone=!!CHECKS[t.id];
         CHECKS[t.id]=cb.checked;
+        CHECKS_DATE=todayStr();
         const key=t.stat||STAT_KEYS[0];
         if(STATS && STAT_KEYS.includes(key)){
           const inc=getStatIncrement();
@@ -1319,7 +1339,7 @@ document.getElementById('confirmCard').addEventListener('click',()=>{
 document.getElementById('resetBtn').addEventListener('click',async()=>{
   if(!confirm('Reset all checks, custom tasks, and Level 1 stats? (arc resets to Day 1)')) return;
   if(AUTH.authenticated){
-    DATA=clone(DEFAULTS); CHECKS={}; STATS=null; STREAK=0; LAST_100=null; ARC_START=todayStr(); ARC_DAYS=DEFAULT_ARC_DAYS;
+    DATA=clone(DEFAULTS); CHECKS={}; CHECKS_DATE=todayStr(); STATS=null; STREAK=0; LAST_100=null; ARC_START=todayStr(); ARC_DAYS=DEFAULT_ARC_DAYS;
     localStorage.clear();
     // reset stat defs to default
     STAT_KEYS=["hydration","nutrition","training","recovery","deepWork","discipline","reading","socialLife"];
@@ -1330,7 +1350,7 @@ document.getElementById('resetBtn').addEventListener('click',async()=>{
     render(); updateArcUI();
   } else {
     localStorage.clear();
-    DATA=clone(DEFAULTS); CHECKS={}; STATS=null; STREAK=0; LAST_100=null; ARC_START=todayStr(); ARC_DAYS=DEFAULT_ARC_DAYS;
+    DATA=clone(DEFAULTS); CHECKS={}; CHECKS_DATE=todayStr(); STATS=null; STREAK=0; LAST_100=null; ARC_START=todayStr(); ARC_DAYS=DEFAULT_ARC_DAYS;
     localStorage.setItem(LS_ARC_START, ARC_START); localStorage.setItem(LS_ARC_DAYS, String(ARC_DAYS));
     STAT_KEYS=["hydration","nutrition","training","recovery","deepWork","discipline","reading","socialLife"];
     STAT_LABELS=["Hydration","Nutrition","Training","Recovery","Deep Work","Discipline","Reading","Social Life"];
@@ -1359,7 +1379,7 @@ async function init(){
     authArea.appendChild(userPill); authArea.appendChild(logout);
     const cloud=await fetchCloud();
     if(cloud){
-      DATA=cloud.data||clone(DEFAULTS); CHECKS=cloud.checks||{}; STATS=cloud.stats||null; STREAK=cloud.streak||0; LAST_100=cloud.last_100_date||null; ARC_START=cloud.arc_start_date || (STATS && STATS._arc_start) || null;
+      DATA=cloud.data||clone(DEFAULTS); CHECKS=cloud.checks||{}; CHECKS_DATE=cloud.checks_date||(cloud.stats&&cloud.stats._checks_date)||null; STATS=cloud.stats||null; STREAK=cloud.streak||0; LAST_100=cloud.last_100_date||null; ARC_START=cloud.arc_start_date || (STATS && STATS._arc_start) || null;
       let cloudArcDays = cloud.arc_days || (STATS && (STATS._arc_days || STATS._arcDays)) || null;
       if(cloudArcDays){ try{ ARC_DAYS=Math.min(365,Math.max(7,parseInt(cloudArcDays,10)||90)); }catch{ ARC_DAYS=DEFAULT_ARC_DAYS; } } else { ARC_DAYS=DEFAULT_ARC_DAYS; }
       if(!ARC_START) ARC_START=todayStr();
@@ -1371,13 +1391,13 @@ async function init(){
         if('activeRecall' in STATS && !('socialLife' in STATS)){ STATS.socialLife=STATS.activeRecall; delete STATS.activeRecall; }
       }
     } else {
-      DATA=clone(DEFAULTS); CHECKS={}; STATS=null; STREAK=0; LAST_100=null; ARC_START=todayStr(); ARC_DAYS=DEFAULT_ARC_DAYS;
+      DATA=clone(DEFAULTS); CHECKS={}; CHECKS_DATE=todayStr(); STATS=null; STREAK=0; LAST_100=null; ARC_START=todayStr(); ARC_DAYS=DEFAULT_ARC_DAYS;
       document.getElementById('footerMode').textContent='Cloud-synced • '+AUTH.email+' • '+ARC_DAYS+'-day arc';
     }
   } else {
     googleBtn.style.display='flex';
     const local=loadLocal();
-    DATA=local.data; CHECKS=local.checks; STATS=local.stats; STREAK=local.streak; LAST_100=local.last; ARC_START=local.arcStart || localStorage.getItem(LS_ARC_START) || null;
+    DATA=local.data; CHECKS=local.checks; CHECKS_DATE=local.checksDate||(local.stats&&local.stats._checks_date)||null; STATS=local.stats; STREAK=local.streak; LAST_100=local.last; ARC_START=local.arcStart || localStorage.getItem(LS_ARC_START) || null;
     let localArcDays = local.arcDays || parseInt(localStorage.getItem(LS_ARC_DAYS)||'0',10) || (STATS && (STATS._arc_days||STATS._arcDays)) || 0;
     if(localArcDays){ try{ ARC_DAYS=Math.min(365,Math.max(7,parseInt(localArcDays,10)||90)); }catch{ ARC_DAYS=DEFAULT_ARC_DAYS; } } else { ARC_DAYS=DEFAULT_ARC_DAYS; }
     document.getElementById('footerMode').textContent=ARC_DAYS+'-DAY ARC';
@@ -1385,6 +1405,8 @@ async function init(){
     if(STATS && STATS._defs) loadStatDefs();
     else loadStatDefs();
   }
+  // Daily reset: yesterday's ticks never carry into today
+  if(maybeResetChecksForNewDay()) saveAll();
   // migrate any lingering activeRecall keys
   if(STATS && 'activeRecall' in STATS){ STATS.socialLife=STATS.activeRecall; delete STATS.activeRecall; }
   DATA.forEach(cat=>cat.tasks.forEach(t=>{ if(t.stat==='activeRecall') t.stat='socialLife'; }));
@@ -1424,6 +1446,13 @@ async function init(){
   try{ setupMobMenu(); syncMobMeta(); }catch{}
   // persist arc start if newly created and authenticated
   if(AUTH.authenticated) saveAll();
+  // midnight rollover: fresh checklist if day changes while tab stays open
+  if(!window._winterarcRollover){
+    window._winterarcRollover=true;
+    const rollover=()=>{ if(maybeResetChecksForNewDay()){ saveAll(); render(); refreshUI(); } };
+    setInterval(rollover, 60000);
+    document.addEventListener('visibilitychange',()=>{ if(!document.hidden) rollover(); });
+  }
 }
 init();
 window.WINTERARC={get DATA(){return DATA}, get CHECKS(){return CHECKS}, get STATS(){return STATS}, get AUTH(){return AUTH}, get STAT_KEYS(){return STAT_KEYS}, get STAT_LABELS(){return STAT_LABELS}, get ARC_START(){return ARC_START}, ARC_DAYS};
