@@ -5,7 +5,7 @@
   "scripts": {
     "build": "node scripts/build-public.mjs",
     "dev": "npm run build && wrangler pages dev public --env-file .env.local",
-    "deploy": "npm run build && wrangler pages deploy public",
+    "deploy": "npm run build && wrangler pages deploy public --project-name winterarc --branch main",
     "test": "node tests/test_cloudflare.mjs",
     "typecheck": "tsc --noEmit"
   },
