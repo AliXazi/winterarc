@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "include": [
+    "/api/*",
+    "/auth/*",
+    "/health",
+    "/admin",
+    "/admin/*"
+  ],
+  "exclude": [
+    "/static/*",
+    "/sitemap.xml",
+    "/robots.txt",
+    "/favicon.ico"
+  ]
+}

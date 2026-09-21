@@ -38,16 +38,16 @@ No Google creds? `/auth/google` shows setup help. For local cloud test without G
 - `DATABASE_URL` — `sqlite+aiosqlite:///./winterarc.db` (default) or `postgresql+asyncpg://…` (Render sets automatically)
 - `ALLOW_DEV_LOGIN` — `1` to expose dev-login form even when Google is configured (default: hidden, Google-only)
 
-## Deploy (Render — Docker, recommended)
+## Deploy (Cloudflare Pages — Recommended, Zero Sleep)
+
+See `CLOUDFLARE_DEPLOY.md` + `wrangler.jsonc` + `functions/` + `public/`.
+- **Zero cold starts**, no 15-minute spin-down, 100% free hosting.
+- Connects directly to existing Neon PostgreSQL database.
+- One-click deployment from GitHub via Cloudflare Pages.
+
+### Legacy Deploy (Render — Docker)
 
 See `DEPLOY.md` + `render.yaml` + `Dockerfile`.
-
-1. Push to GitHub → Render Dashboard → New → Blueprint → pick repo → `render.yaml` auto-applies (web + free Postgres).
-2. Env vars in Render: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `SESSION_SECRET` (Generate Value).
-3. After deploy, add real redirects in Google Console: `https://winterarc.online/auth/google/callback` + `https://winterarc-a1ua.onrender.com/auth/google/callback`. Custom domain `winterarc.online` already attached → verify `https://winterarc.online/health`.
-4. Verify `/health` and Google sign-in → check task → refresh → same on another device.
-
-Fly.io / Railway analogues in `DEPLOY.md`.
 
 ## Core flows
 
