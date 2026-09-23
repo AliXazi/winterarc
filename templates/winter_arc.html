@@ -74,6 +74,7 @@
   .mob-toggle:hover{background:var(--text);color:#000}
   .mob-menu{display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface-card);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);padding:14px 20px;flex-direction:column;gap:8px;z-index:15;box-shadow:0 12px 24px rgba(0,0,0,0.6)}
   .mob-menu.open{display:flex}
+  #mobLogoutBtn{display:none}
   .mob-menu a,.mob-menu button.mob-link{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:12px 14px;border:1px solid var(--hairline);background:transparent;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px}
   .mob-menu a:hover,.mob-menu button.mob-link:hover{color:var(--text);border-color:var(--text);background:rgba(255,255,255,0.04)}
   .mob-menu .mob-meta{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted-soft);padding:8px 2px 2px;display:flex;flex-wrap:wrap;gap:8px}
@@ -96,6 +97,10 @@
     #authArea .user-pill img{width:36px;height:36px}
     #authArea .user-pill span{max-width:90px;font-size:10px}
     #logoutBtn{display:none !important}
+    /* mobile authed: hide Sign in (the !important above beats JS inline style),
+       show Sign out as a full-width dropdown row instead — no header overlap */
+    body.authed .header-actions #googleBtn{display:none !important}
+    body.authed #mobLogoutBtn{display:flex}
     .mob-toggle{display:grid}
     .hero-band{padding-top:48px}
   }
@@ -431,6 +436,7 @@
         <a href="/privacy">Guidelines / Privacy <span>→</span></a>
         <a href="/faq">FAQs <span>→</span></a>
         <button class="mob-link" id="mobResetBtn" type="button">Reset Protocol <span>↺</span></button>
+        <a href="/auth/logout" id="mobLogoutBtn">Sign out <span>→</span></a>
         <div class="mob-meta" id="mobMeta"><span id="mobCount">0/0 • 0%</span><span id="mobStreak">Streak 0</span><span id="mobStorage">Local</span></div>
       </nav>
     </div>
@@ -1352,6 +1358,7 @@ document.getElementById('resetBtn').addEventListener('click',async()=>{
 async function init(){
   document.getElementById('dateStr').textContent=new Date().toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'});
   AUTH=await fetchAuth();
+  document.body.classList.toggle('authed', !!AUTH.authenticated);
   const authArea=document.getElementById('authArea');
   const oldUser=document.getElementById('userPill'); if(oldUser) oldUser.remove();
   const oldLogout=document.getElementById('logoutBtn'); if(oldLogout) oldLogout.remove();
