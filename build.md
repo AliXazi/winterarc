@@ -1,7 +1,15 @@
 # Build Log: WINTERARC
 
 > Status: Phase 6 — Handoff Complete — PAUSED 1 WEEK (marketing + SEO/AdSense queue)
-> Last updated: 2026-09-02
+> Last updated: 2026-09-23
+
+## 0. Session Log — 2026-09-23 (Cloudflare stack)
+- Stack now: Cloudflare Pages + Functions (Hono, `src/`, `functions/[[path]].ts`) + Neon serverless Postgres (`crimson-cell-49210977` / `production`). Legacy FastAPI `app/` retained but inactive; `winter_arc.html` is the source, `public/` is built via `scripts/build-public.mjs`.
+- Fix 1 — task desc tick dead (`3ebe115`): blur/click race re-opened editing. Added `mousedown preventDefault` on edit btn + idempotent `stopEdit`. ✓ now saves + exits edit mode.
+- Fix 2 — streak stuck (`3ebe115`): `handleMissedStreakOnLoad` early-returned when `LAST_100` null, freezing stale streaks. Now resets `STREAK=0` when no/invalid `last_100_date` older than yesterday.
+- Fix 3 — mobile authed header (`b9d52a9`, mobile-only): `!important` Sign-in rule beat JS hide. Added `body.authed` toggle — hides Sign in, shows full-width Sign out row in ☰ dropdown. Desktop untouched.
+- Fix 4 — desktop Log out alignment (`2c95002`, desktop-only): compact 40px `#logoutBtn` matching account pill, no underline/wrap. Mobile untouched.
+- All fixes mirrored `winter_arc.html` + `templates/winter_arc.html`, `public/` rebuilt, `tsc --noEmit` clean, pushed to `main` (Cloudflare auto-deploy). Next: verify live after CDN rebuild.
 
 > **Live:** https://winterarc.online (custom domain, Render fallback https://winterarc-a1ua.onrender.com) — all fixes live: topbar restored (Local badge removed, hero + bottom progress centred, footer roomier), fox favicon, SEO sitemap/robots, branding verified. **Paused until 2026-09-09** for marketing + Search Console indexing → then AdSense + keyword expansion.
 
