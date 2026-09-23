@@ -997,11 +997,17 @@ function checkStreakOnProgress(){
   }
 }
 function handleMissedStreakOnLoad(){
-  if(!LAST_100 || STREAK===0) return;
+  if(STREAK===0) return;
   const today=todayStr();
   if(LAST_100===today || LAST_100===yesterdayStr()) return;
+  // No record of a 100% day but streak > 0 = inconsistent state (e.g. legacy row) → reset
+  if(!LAST_100){
+    STREAK=0;
+    saveAll();
+    return;
+  }
   const diff=(new Date(today)-new Date(LAST_100))/(1000*60*60*24);
-  if(diff>1){
+  if(!isFinite(diff) || diff>1){
     STREAK=0;
     saveAll();
     toast('Streak reset to 0 — missed day');
@@ -1069,10 +1075,14 @@ function render(){
       });
       function startEdit(){ desc.contentEditable='true'; desc.focus(); const r=document.createRange(); r.selectNodeContents(desc); r.collapse(false); const s=window.getSelection(); s.removeAllRanges(); s.addRange(r); editBtn.textContent='✓'; }
       function stopEdit(){
+        if(!desc.isContentEditable) return;
         desc.contentEditable='false'; editBtn.textContent='✎';
         const v=desc.innerText.trim()||t.desc;
         if(v!==t.desc){ t.desc=v; desc.textContent=v; saveAll(); toast('Updated'); try{ syncMobMeta(); }catch{} } else desc.textContent=t.desc;
       }
+      // Prevent mousedown focus-shift: without this, clicking ✓ blurs desc first
+      // (stopEdit runs on blur) then click re-opens editing so the tick appears dead.
+      editBtn.addEventListener('mousedown',e=>e.preventDefault());
       editBtn.addEventListener('click',()=>{ if(desc.isContentEditable) stopEdit(); else startEdit(); });
       desc.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); stopEdit(); } if(e.key==='Escape'){ desc.textContent=t.desc; stopEdit(); } });
       desc.addEventListener('blur',()=>{ if(desc.isContentEditable) stopEdit(); });
